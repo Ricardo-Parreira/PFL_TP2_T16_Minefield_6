@@ -81,7 +81,7 @@ print_multi_banner(List, Symbol, Padding):-
     print_filler(List, Symbol, Padding), nl, 
     print_multi_text(List,Symbol,Padding,MaxLength), nl, 
     print_filler(List,Symbol,Padding), nl, 
-    print_border(List,Symbol,Padding).
+    print_border(List,Symbol,Padding), nl.
 
 
 % têm de ter todos tamanho par ou impar depois resolvo isto
@@ -96,16 +96,32 @@ draw_menu :- print_multi_banner(["MINEFIELD",
                                 "4.PC vs PC "], '*', 4 ).
 
 
-/*
-(["MENU ", 
-                                "Welcome player!",
-                                "Please choose which game type you would like to play:",
-                                "1.Human vs Human ",
-                                "2.Human vs PC",
-                                "3.PC vs Human",
-                                "4.PC vs PC "], '*', 0 ).*/
-
 /* ####################################### */
 
+
+/* ############## USER INPUT ############### */
+
+% function from the class
+read_number(N, N) :- peek_code(10), !.
+read_number(N, Acc) :- get_code(X), X1 is X - 48, between(0, 9, X1), Acc1 is Acc *10 + X1, read_number(N, Acc1).
+
+% turns the users input into a list filled with the ascii values 
+read_input([]) :- peek_code(10), !.
+read_input(AsciiList) :- peek_code(10), !.
+read_input([X|Rest]) :- get_code(X), read_input(Rest).
+
+%takes an Ascii value and passes it to the number
+to_number(Ascii, Number) :- Number is Ascii - 48. 
+
+/* ######################################*/
+
+
+/* ################# GAME STATE ############## */
+
+game_type(N) :- print_text("Game type set to ", '', 0), write(N).
+
 play:-
-    draw_menu.
+    draw_menu,
+    read_input([Ascii | N]), 
+    to_number(Ascii, Type),
+    game_type(Type).
