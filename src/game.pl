@@ -15,15 +15,11 @@ display_game([Board, Player]):-
     print_board(Board), 
     nl.
 
-start_game(GameState) :-
-    display_game(GameState),
-    game_cycle(GameState).
-
 within_bounds(Board, Row, Col) :-
     length(Board, Size),
     between(1, Size, Row),
     between(1, Size, Col).
-    
+
 cell_empty(Board, Row, Col) :-
     nth1(Row, Board, RowList),
     nth1(Col, RowList, empty).
@@ -51,10 +47,11 @@ move([Board, CurrentPlayer ], [Row, Col], [NewBoard, NextPlayer ]) :-
     set_cell(Board, Row, Col, CurrentPlayer, NewBoard), 
     switch_player(CurrentPlayer, NextPlayer).
 
-game_cycle(GameState) .    
+game_cycle(GameState):-
+    display_game(GameState) .    
 play :-
     draw_menu,                      
     choose_game_type(Type),         
     configure_game(Type, Config),    
     initial_state(Config, GameState),
-    start_game(GameState).           
+    game_cycle(GameState).           
