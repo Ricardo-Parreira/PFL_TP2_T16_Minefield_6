@@ -15,18 +15,22 @@ choose_game_type(Type) :-
 configure_game(Type, Config) :-
     write('Enter board size (10, 13 or 16): '), nl,
     read_number(BoardSize),
-    (Type = 2 ; Type = 3 ; Type = 4
+    
+    (   (Type == 2 ; Type == 3 ; Type == 4)
     ->  write('Enter difficulty level (1: Random, 2: Hard): '), nl,
         repeat,
-        read_number(Difficulty)
+        read_number(Difficulty),
         (   between(1, 2, Difficulty)
-        ->  !
+        ->  !  
         ;   write('Invalid choice, please try again.'), nl,
-            fail 
+            fail  
         )
-    ;   Difficulty = none 
+    ;   Difficulty = none  
     ),
-    Config = [Type,BoardSize,Difficulty].
+    
+    Config = [Type, BoardSize, Difficulty].
+
+
 
 %GameState with Board, first player 
 initial_state([Type,BoardSize,Difficulty], GameState) :-
