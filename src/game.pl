@@ -16,9 +16,7 @@ start_game(GameState) :-
     display_game(GameState),
     game_cycle(GameState).
 
-game_cycle(GameState) :-
-    write("Hello").
-    
+game_cycle(GameState) .    
 play :-
     draw_menu,                      
     choose_game_type(Type),         

@@ -102,9 +102,18 @@ draw_menu :- print_multi_banner(["MINEFIELD",
 
 /* ############## USER INPUT ############### */
 
-% function from the class
-read_number(N, N) :- peek_code(10), !.
-read_number(N, Acc) :- get_code(X), X1 is X - 48, between(0, 9, X1), Acc1 is Acc *10 + X1, read_number(N, Acc1).
+
+read_number(N) :-
+    read_number(N, 0). 
+
+read_number(N, N) :- peek_code(10),get_code(_),  !.
+
+read_number(N, Acc) :-
+    get_code(X), 
+    X >= 48, X =< 57, 
+    X1 is X - 48,  
+    Acc1 is Acc * 10 + X1,  
+    read_number(N, Acc1).  
 
 % turns the users input into a list filled with the ascii values 
 % Lê os caracteres até a quebra de linha e retorna uma lista de códigos ASCII
@@ -121,4 +130,3 @@ read_input([X|Rest]) :-
 to_number(Ascii, Number) :- Number is Ascii - 48. 
 
 /* ######################################*/
-
