@@ -1,16 +1,27 @@
 :- consult(utils).
+:- consult(game_config).
 :- use_module(library(between)).
 
-game_type(N) :- print_text("Game type set to ", '', 0), write(N).
+display_game([Board, Player]):- 
+    nl,  % Add an extra line for separation
+    write('Current Player: '), 
+    write(Player), 
+    nl, 
+    write('Game Board: '), 
+    nl, 
+    print_board(Board), 
+    nl.
 
+start_game(GameState) :-
+    display_game(GameState),
+    game_cycle(GameState).
+
+game_cycle(GameState) :-
+    write("Hello").
+    
 play :-
-    draw_menu,
-    repeat,
-    read_input([Ascii | _]),
-    to_number(Ascii, Type),
-    (  between(1, 4, Type)
-    ->  game_type(Type), 
-        ! 
-    ;   write('Invalid choice, please try again.'), nl,
-        fail 
-    ).
+    draw_menu,                      
+    choose_game_type(Type),         
+    configure_game(Type, Config),    
+    initial_state(Config, GameState),
+    start_game(GameState).           
