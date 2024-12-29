@@ -11,11 +11,18 @@ choose_game_type(Type) :-
     ;   write('Invalid choice, please try again.'), nl,
         fail 
     ).
-
+valid_board_size(BoardSize):-
+    BoardSize = 10; BoardSize = 13; BoardSize = 16.
+    
 configure_game(Type, Config) :-
     write('Enter board size (10, 13 or 16): '), nl,
+    repeat,
     read_number(BoardSize),
-    
+    ( valid_board_size(BoardSize)
+    -> !  
+    ; write('Invalid board size, please try again.'), nl,
+      fail
+    ),
     (   (Type == 2 ; Type == 3 ; Type == 4)
     ->  write('Enter difficulty level (1: Random, 2: Hard): '), nl,
         repeat,
