@@ -134,6 +134,13 @@ read_input([X|Rest]) :-
     get_code(X), 
     read_input(Rest).
 
+% Reading moves
+parse_input([Row, Col], [Row, Col]) :- integer(Row), integer(Col).  % Already in [Row, Col]
+parse_input(Row-Col, [Row, Col]) :- integer(Row), integer(Col).     % Input as Row-Col
+parse_input((Row, Col), [Row, Col]) :- integer(Row), integer(Col).    % Input as Row,Col
+parse_input(_, _) :-
+    write('Invalid input format. Use (Row,Col) or Row-Col or [Row, Col].'), nl,
+    fail.
 
 %takes an Ascii value and passes it to the number
 to_number(Ascii, Number) :- Number is Ascii - 48. 
