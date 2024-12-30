@@ -43,4 +43,5 @@ configure_game(Type, Config) :-
 initial_state([Type,BoardSize,Difficulty], GameState) :-
     create_board(empty, BoardSize, Board),
     GameState = [Board,  'Black'].
+    
 
