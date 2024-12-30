@@ -54,3 +54,22 @@ initial_state([Type,BoardSize,Difficulty], GameState) :-
     create_board(empty, BoardSize, Board),
     GameState = [Board,  'Player1'].
 
+handle_menu(1) :-
+    draw_menu(1),
+    choose_game_type(Type),          
+    configure_game(Type, Config),    
+    initial_state(Config, GameState),
+    game_cycle(GameState).           
+
+% Show the instructions menu
+handle_menu(2) :-
+    draw_menu(2),   
+    wait_for_enter,
+    fail.
+
+handle_menu(3) :-
+    write('Exiting the game...'), nl.
+
+handle_menu(_) :-
+    write('Invalid option, please try again.'), nl.
+

@@ -121,10 +121,8 @@ draw_menu(2) :- print_multi_banner(["INSTRUCTIONS ",
                                         "a hard corner or a switch. ",
                                         " ",
                                         "Hard corner is a ... ",
-                                        "Switch is a ..."], '*', 4), play_when_enter.
+                                        "Switch is a ..."], '*', 4).
 
-% sai mesmo do sicstus
-draw_menu(3) :- write("Exiting..."), nl, halt.
 
 /* ####################################### */
 
@@ -158,13 +156,12 @@ read_input([X|Rest]) :-
 %takes an Ascii value and passes it to the number
 to_number(Ascii, Number) :- Number is Ascii - 48. 
 
-play_when_enter :- 
+wait_for_enter :-
     peek_code(10),
     get_code(_),
-    play,
     !.
-play_when_enter :- 
+wait_for_enter :-
     get_code(_),
-    play_when_enter.
-
+    wait_for_enter.
+               
 /* ######################################*/
