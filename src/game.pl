@@ -25,19 +25,20 @@ cell_empty(Board, Row, Col) :-
     nth1(Col, RowList, empty).
     
 set_cell([Row|Rest], 1, Col, Value, [NewRow|Rest]) :-  
-    color(Value, Color),  
-    set_cell_in_row(Row, Col, Color, NewRow).  
+    set_cell_in_row(Row, Col, Value, NewRow).  
 
 set_cell([Row|Rest], RowIndex, Col, Value, [Row|NewRest]) :- 
     RowIndex > 1,  
-    NewRowIndex is RowIndex - 1, 
-    set_cell(Rest, NewRowIndex, Col, Value, NewRest). 
+    NextRowIndex is RowIndex - 1, 
+    set_cell(Rest, NextRowIndex, Col, Value, NewRest).
 
-set_cell_in_row([_Empty|Rest], 1, Color, [Color|Rest]).  
-set_cell_in_row([Current|Rest], ColIndex, Color, [Current|NewRest]) :-
+set_cell_in_row([_|Rest], 1, Value, [Value|Rest]).  
+
+% Avança para a próxima célula na linha
+set_cell_in_row([Current|Rest], ColIndex, Value, [Current|NewRest]) :-
     ColIndex > 1,  
-    NewColIndex is ColIndex - 1,  
-    set_cell_in_row(Rest, NewColIndex, Color, NewRest).  
+    NextColIndex is ColIndex - 1,  
+    set_cell_in_row(Rest, NextColIndex, Value, NewRest). 
 
 
 is_valid_move(Board, Row, Col, Player) :-
@@ -58,27 +59,11 @@ move([Board, CurrentPlayer], _, [Board, NextPlayer]) :-
     switch_player(CurrentPlayer, NextPlayer).
 
 move([Board, CurrentPlayer], [Row, Col], [NewBoard, NextPlayer]) :-
-    write('Board before move: '), nl, print_board(Board), nl,
-    valid_moves([Board, CurrentPlayer], ValidMoves),
-    write('Valid moves: '), write(ValidMoves), nl,
-    
-    member([Row, Col], ValidMoves),  % Check if the move is valid
-    
-    
-    set_cell(Board, Row, Col, CurrentPlayer, NewBoard),
-    
-    % Switch to the next player
-    switch_player(CurrentPlayer, NextPlayer),
-    
-    % Print the current player and board state
-    write('Next Player: '), write(NextPlayer), nl,
-    write('Current Player: '), write(CurrentPlayer), nl,
-    write('Move: '), write(Row-Col), nl,
-    
-    % Display the updated board
-    write('Board after move: '), nl,
-    print_board(NewBoard).  % This will print the updated board after the move
-
+    valid_moves([Board, CurrentPlayer], ValidMoves),    
+    member([Row, Col], ValidMoves),  
+    color(CurrentPlayer,Value),
+    set_cell(Board, Row, Col, Value, NewBoard),
+    switch_player(CurrentPlayer, NextPlayer).
 
 
 

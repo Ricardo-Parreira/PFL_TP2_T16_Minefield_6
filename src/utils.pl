@@ -2,8 +2,8 @@
 
 default(empty).
 
-color('Black', 'B').
-color('White', 'W').
+color('Black', b).
+color('White', w).
 
 char(b, 'B').
 char(w, 'W').
@@ -21,17 +21,24 @@ create_board(Element, Size, Board):-
     create_list(List, Size, Board).
 
 
-%%% print the board
+print_item(Item) :-
+    char(Item,New),
+    write(New). 
 
-print_item(Item):- char(Item, C), write(C).
+print_full_list([]) :-
+    nl.  
 
-print_full_list([]):- write(''), !.
-print_full_list([Item]):- !, print_item(Item).
-print_full_list([Item|Rest]):- print_item(Item), write(' '), print_full_list(Rest).
+print_full_list([Item|Rest]) :-
+    print_item(Item),
+    write(' '),  
+    print_full_list(Rest).
 
-print_board([]):- write(''), !.
-print_board([Row]):- !, print_full_list(Row).
-print_board([Row|Rest]):- print_full_list(Row), nl, print_board(Rest).
+
+print_board([]).  
+
+print_board([Row|Rest]) :-
+    print_full_list(Row),  
+    print_board(Rest).  
 
 /* ############ DRAW THE MENU ############## */
 
