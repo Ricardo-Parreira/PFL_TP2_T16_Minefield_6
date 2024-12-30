@@ -50,7 +50,9 @@ move([Board, CurrentPlayer ], [Row, Col], [NewBoard, NextPlayer ]) :-
 game_cycle(GameState):-
     display_game(GameState) .    
 play :-
-    draw_menu,                      
+    draw_welcome,
+    choose_menu(Menu),
+    draw_menu(Menu),                      
     choose_game_type(Type),         
     configure_game(Type, Config),    
     initial_state(Config, GameState),

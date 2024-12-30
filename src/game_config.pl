@@ -3,6 +3,15 @@ game_type(N) :-
     print_text("Game type set to ", '', 0),
     write(N), nl.
 
+choose_menu(Input) :-
+    repeat,
+    read_number(Input),
+    (   between(1, 3, Input)
+    -> !
+    ;   write('Invalid choice, please try again.'), nl,
+        fail 
+    ).
+
 choose_game_type(Type) :-
     repeat,
     read_number(Type),
@@ -11,6 +20,7 @@ choose_game_type(Type) :-
     ;   write('Invalid choice, please try again.'), nl,
         fail 
     ).
+
 valid_board_size(BoardSize):-
     BoardSize = 10; BoardSize = 13; BoardSize = 16.
     

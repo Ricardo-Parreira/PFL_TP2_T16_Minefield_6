@@ -85,8 +85,19 @@ print_multi_banner(List, Symbol, Padding):-
     print_border(List,Symbol,Padding), nl.
 
 
+
+
 % têm de ter todos tamanho par ou impar depois resolvo isto
-draw_menu :- print_multi_banner(["MINEFIELD",
+draw_welcome :- print_multi_banner(["MINEFIELD",
+                                " ",
+                                "MENU ", 
+                                "Welcome player!",
+                                "1.Play ",
+                                "2.Instructions ",
+                                "3.Exit "], '*', 4 ).
+
+% draw game type menu
+draw_menu(1) :- print_multi_banner(["MINEFIELD",
                                 " ",
                                 "MENU ", 
                                 "Welcome player!",
@@ -96,6 +107,24 @@ draw_menu :- print_multi_banner(["MINEFIELD",
                                 "3.PC vs Human",
                                 "4.PC vs PC "], '*', 4 ).
 
+% draw the instructions
+draw_menu(2) :- print_multi_banner(["INSTRUCTIONS ",
+                                        " ",
+                                        "Minefield is a two player game.",
+                                        "Each player has pieces of a different colour ",
+                                        "that they place, by turns, in the board. ",
+                                        "The player with the black pieces wins if he can create a path",
+                                        "of black pieces between the top and bottom of the board. ",
+                                        "The player with the white pieces wins if he can connect the",
+                                        "sides of the board in the same way.",
+                                        "However the players cannot place a piece if it would create",
+                                        "a hard corner or a switch. ",
+                                        " ",
+                                        "Hard corner is a ... ",
+                                        "Switch is a ..."], '*', 4), play_when_enter.
+
+% sai mesmo do sicstus
+draw_menu(3) :- write("Exiting..."), nl, halt.
 
 /* ####################################### */
 
@@ -128,5 +157,14 @@ read_input([X|Rest]) :-
 
 %takes an Ascii value and passes it to the number
 to_number(Ascii, Number) :- Number is Ascii - 48. 
+
+play_when_enter :- 
+    peek_code(10),
+    get_code(_),
+    play,
+    !.
+play_when_enter :- 
+    get_code(_),
+    play_when_enter.
 
 /* ######################################*/
