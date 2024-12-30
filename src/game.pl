@@ -56,6 +56,7 @@ move([Board, CurrentPlayer], _, [Board, NextPlayer]) :-
 
 move([Board, CurrentPlayer], _, [Board, NextPlayer]) :-
     valid_moves([Board, CurrentPlayer], []),  % If no valid moves, just switch player
+    write('You have no valid moves.'),
     switch_player(CurrentPlayer, NextPlayer).
 
 move([Board, CurrentPlayer], [Row, Col], [NewBoard, NextPlayer]) :-
@@ -64,6 +65,12 @@ move([Board, CurrentPlayer], [Row, Col], [NewBoard, NextPlayer]) :-
     color(CurrentPlayer,Value),
     set_cell(Board, Row, Col, Value, NewBoard),
     switch_player(CurrentPlayer, NextPlayer).
+
+check_game_over([Board, CurrentPlayer], true) :-
+    valid_moves([Board, 'White'], []),
+    valid_moves([Board, 'Black'], []),
+    write('GAME OVER').
+
 
 
 choose_move([Board, CurrentPlayer], 0, Move) :- 
@@ -83,6 +90,10 @@ choose_move([Board, CurrentPlayer], 0, Move) :-
 choose_move([Board, CurrentPlayer], 1, Move) :-
     valid_moves([Board, CurrentPlayer], ValidMoves),
     random_member(Move, ValidMoves).
+
+game_cycle(GameState) :-
+    check_game_over(GameState, T),
+    T = true, !.
 
 game_cycle(GameState) :-
     display_game(GameState),  
