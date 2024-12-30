@@ -2,8 +2,8 @@
 :- consult(game_config).
 :- use_module(library(between)).
 
-switch_player('Player1', 'Player2').
-switch_player('Player2', 'Player1').
+switch_player('Black', 'White').
+switch_player('White', 'Black').
 
 display_game([Board, Player]):- 
     nl,  % Add an extra line for separation

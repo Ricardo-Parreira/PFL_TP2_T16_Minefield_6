@@ -42,5 +42,5 @@ configure_game(Type, Config) :-
 %GameState with Board, first player 
 initial_state([Type,BoardSize,Difficulty], GameState) :-
     create_board(empty, BoardSize, Board),
-    GameState = [Board,  'Player1'].
+    GameState = [Board,  'Black'].
 

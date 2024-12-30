@@ -2,26 +2,35 @@
 
 default(empty).
 
-char(b, 'B').
-char(w, 'W').
-char(empty, '#').
-
-player(1, player1).
-player(2, player2).
-
-board(2, [[empty, empty], [empty, empty]]).
-board(3, [[empty, empty, empty], [empty, empty, empty], [empty, empty, empty]]).
-
+char(b, 'B').     % Black edge
+char(w, 'W').     % White edge
+char(empty, '#'). % Empty cell
 
 create_list(_, 0, []).
-create_list(Element, Size, [Element|Sublist]):-
+create_list(Element, Size, [Element|Sublist]) :-
     Size > 0,
     Size1 is Size - 1,
     create_list(Element, Size1, Sublist).
 
-create_board(Element, Size, Board):-
-    create_list(Element, Size, List),
-    create_list(List, Size, Board).
+create_board(Element, InnerSize, FinalBoard) :-
+    create_list(Element, InnerSize, InnerRow),
+    create_list(InnerRow, InnerSize, InnerBoard),
+
+    add_edges(InnerBoard, InnerSize, FinalBoard).
+
+add_edges(InnerBoard, InnerSize, FinalBoard) :-
+    create_list(b, InnerSize + 2, BlackEdge),
+
+    add_white_edges(InnerBoard, InnerBoardWithWhiteEdges),
+
+    append([BlackEdge], InnerBoardWithWhiteEdges, TempBoard),
+    append(TempBoard, [BlackEdge], FinalBoard).
+
+% Add white edges to each row of the inner board.
+add_white_edges([], []).
+add_white_edges([Row|Rest], [[w|NewRow]|NewRest]) :-
+    append(Row, [w], NewRow),
+    add_white_edges(Rest, NewRest).
 
 
 %%% print the board
