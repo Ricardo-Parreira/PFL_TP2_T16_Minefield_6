@@ -15,17 +15,17 @@ create_list(Element, Size, [Element|Sublist]):-
     Size > 0,
     Size1 is Size - 1,
     create_list(Element, Size1, Sublist).
-
-/*create_board(Element, Size, Board):-
+create_board(Element, Size, Board):-
     create_list(Element, Size, List),
     create_list(List, Size, Board).
-*/
+
 
 /*Test board*/
+/*
 create_board(Element, Size, Board):-
     create_list(Element, 3, List),
     create_list(List, 3, Board).
-
+*/
 
 print_item(Item) :-
     char(Item,New),
