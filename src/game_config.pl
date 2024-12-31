@@ -32,16 +32,23 @@ configure_game(Type, Config) :-
         ;   write('Invalid choice, please try again.'), nl,
             fail  
         )
-    ;   Difficulty = none  
+    ;   Difficulty = none
     ),
     
     Config = [Type, BoardSize, Difficulty].
 
 
 
-%GameState with Board, first player 
-initial_state([Type,BoardSize,Difficulty], GameState) :-
-    create_board(empty, BoardSize, Board),
-    GameState = [Board,  'Black'].
+% Set up the initial game state
+initial_state([Type, BoardSize, Difficulty], GameState) :-
+    create_board(empty, BoardSize, Board),  
+    players(Type, Difficulty, Players),  
+    GameState = [Board,'Black',Players].
+
+% Configure players based on the game type
+players(1, _, [['Black', 0], ['White', 0]]) :- !. 
+players(2, Difficulty, [['Black', 0], ['White', Difficulty]]) :- !. 
+players(3, Difficulty, [['Black', Difficulty], ['White', 0]]) :- !. 
+players(4, Difficulty, [['Black', Difficulty], ['White', Difficulty]]) :- !. 
     
 

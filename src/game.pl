@@ -5,7 +5,10 @@
 switch_player('Black', 'White').
 switch_player('White', 'Black').
 
-display_game([Board, Player]):- 
+get_difficulty_level([_, CurrentPlayer, Players], Difficulty) :-
+    member([CurrentPlayer, Difficulty], Players).
+
+display_game([Board, Player,_]):- 
     nl,  % Add an extra line for separation
     write('Current Player: '), 
     write(Player), 
@@ -47,62 +50,59 @@ is_valid_move(Board, Row, Col, Player) :-
     %\+ creates_hard_corner(Board, Row, Col, Player),
     %\+ creates_switch(Board, Row, Col, Player).
 
-valid_moves([Board, CurrentPlayer | _], ValidMoves) :-
+valid_moves([Board, CurrentPlayer,_ | _], ValidMoves) :-
     findall([Row, Col], is_valid_move(Board, Row, Col, CurrentPlayer), ValidMoves).
 
-move([Board, CurrentPlayer], _, [Board, NextPlayer]) :-
-    valid_moves([Board, CurrentPlayer], []),
+move([Board, CurrentPlayer, Players], _, [Board, NextPlayer, Players]) :-
+    valid_moves([Board, CurrentPlayer, Players], []), 
+    write('You have no valid moves.'), nl,
     switch_player(CurrentPlayer, NextPlayer).
 
-move([Board, CurrentPlayer], _, [Board, NextPlayer]) :-
-    valid_moves([Board, CurrentPlayer], []),  % If no valid moves, just switch player
-    write('You have no valid moves.'),
-    switch_player(CurrentPlayer, NextPlayer).
-
-move([Board, CurrentPlayer], [Row, Col], [NewBoard, NextPlayer]) :-
-    valid_moves([Board, CurrentPlayer], ValidMoves),    
+move([Board, CurrentPlayer, Players], [Row, Col], [NewBoard, NextPlayer, Players]) :-
+    valid_moves([Board, CurrentPlayer, Players], ValidMoves),    
     member([Row, Col], ValidMoves),  
-    color(CurrentPlayer,Value),
+    color(CurrentPlayer, Value),
     set_cell(Board, Row, Col, Value, NewBoard),
     switch_player(CurrentPlayer, NextPlayer).
 
-check_game_over([Board, CurrentPlayer]) :-
-    valid_moves([Board, 'White'], []),
-    valid_moves([Board, 'Black'], []),
+
+check_game_over([Board, CurrentPlayer,_]) :-
+    valid_moves([Board, 'White',_], []),
+    valid_moves([Board, 'Black',_], []),
     write('GAME OVER'),
     black_wins(Board),
     write('Black player won!').
 
-check_game_over([Board, CurrentPlayer]) :-
-    valid_moves([Board, 'White'], []),
-    valid_moves([Board, 'Black'], []),
+check_game_over([Board, CurrentPlayer,_]) :-
+    valid_moves([Board, 'White',_], []),
+    valid_moves([Board, 'Black',_], []),
     write('GAME OVER').
 
-check_game_over([Board, CurrentPlayer]) :-
+check_game_over([Board, CurrentPlayer,_]) :-
     vertical_wins(Board, b),
     write('Black player won!').
 
-check_game_over([Board, CurrentPlayer]) :-
+check_game_over([Board, CurrentPlayer,_]) :-
     transpose(Board, Transposed),
     vertical_wins(Transposed, w),
     write('White player won!').
 
 
-choose_move([Board, CurrentPlayer], 0, Move) :- 
+choose_move([Board, CurrentPlayer,_], 0, Move) :- 
     write('Enter your move as Row,Col: '), 
     read(Input),
     parse_input(Input, Move), 
-    valid_moves([Board, CurrentPlayer], ValidMoves),  
+    valid_moves([Board, CurrentPlayer,_], ValidMoves),  
     ( member(Move, ValidMoves) ->  
         true  
     ; 
         write('Invalid move. Please try again.'), nl,
-        choose_move([Board, CurrentPlayer], 0, Move)  
+        choose_move([Board, CurrentPlayer,_], 0, Move)  
     ).
 
 
 
-choose_move([Board, CurrentPlayer], 1, Move) :-
+choose_move([Board, CurrentPlayer,_], 1, Move) :-
     valid_moves([Board, CurrentPlayer], ValidMoves),
     random_member(Move, ValidMoves).
 
@@ -112,10 +112,11 @@ game_cycle(GameState) :-
 
 %game not over may proceed
 game_cycle(GameState) :- 
-    choose_move(GameState, 0, Move),  
+    get_difficulty_level(GameState, Difficulty),
+    write('Current player difficulty: '), write(Difficulty), nl,
+    choose_move(GameState, Difficulty, Move),  
     move(GameState, Move, NewGameState),!, 
     game_cycle(NewGameState).  
-
 
    
 play :-
