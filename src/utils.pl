@@ -16,9 +16,15 @@ create_list(Element, Size, [Element|Sublist]):-
     Size1 is Size - 1,
     create_list(Element, Size1, Sublist).
 
-create_board(Element, Size, Board):-
+/*create_board(Element, Size, Board):-
     create_list(Element, Size, List),
     create_list(List, Size, Board).
+*/
+
+/*Test board*/
+create_board(Element, Size, Board):-
+    create_list(Element, 3, List),
+    create_list(List, 3, Board).
 
 
 print_item(Item) :-
@@ -148,3 +154,56 @@ parse_input(_, _) :-
 to_number(Ascii, Number) :- Number is Ascii - 48. 
 
 /* ######################################*/
+
+
+/* ##################### LOGIC TO DETECT WINNER ###################### */
+
+neighbor(Row, Col, RowUp, Col) :- RowUp is Row - 1.
+neighbor(Row, Col, RowDown, Col) :- RowDown is Row + 1.
+neighbor(Row, Col, Row, ColLeft) :- ColLeft is Col - 1.
+neighbor(Row, Col, Row, ColRight) :- ColRight is Col + 1.
+
+neighbor_coords(Row, Col, Size, Neighbors) :-
+    findall(
+        R-C,
+        (
+            neighbor(Row, Col, R, C),       % Get a neighbor.
+            R > 0, R =< Size,               % Row is within bounds.
+            C > 0, C =< Size                % Column is within bounds.
+        ),
+        Neighbors
+    ).
+
+
+black_wins(Board) :-
+    length(Board, Size),
+    nth1(1, Board, FirstRow),
+    findall(StartCol, nth1(StartCol, FirstRow, b), BlackCols), % Find all black stones in the first row
+    member(StartCol, BlackCols),
+    dfs_black(Board, 1, StartCol, Size, []).        % Start DFS from each stone
+
+dfs_black(Board, Row, Col, Size, _) :-
+    Row =:= Size,
+    nth1(Row, Board, RowList),
+    nth1(Col, RowList, b). % Ensure we have a black stone in the last row
+
+dfs_black(Board, Row, Col, Size, Visited) :-
+    neighbor_coords(Row, Col, Size, Neighbors),
+    explore_neighbors(Board, Neighbors, Size, [Row-Col | Visited]).
+
+explore_neighbors(_, [], _, _) :- fail.             
+explore_neighbors(Board, [Row-Col | Rest], Size, Visited) :-
+    \+ member(Row-Col, Visited),                   
+    nth1(Row, Board, RowList),
+    nth1(Col, RowList, b),                         % Ensure the neighbor is a black stone
+    dfs_black(Board, Row, Col, Size, Visited);     % Continue DFS from this neighbor
+    explore_neighbors(Board, Rest, Size, Visited). % Explore the remaining neighbors
+
+
+
+
+
+
+
+
+

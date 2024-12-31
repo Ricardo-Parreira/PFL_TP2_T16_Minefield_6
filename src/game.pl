@@ -66,11 +66,25 @@ move([Board, CurrentPlayer], [Row, Col], [NewBoard, NextPlayer]) :-
     set_cell(Board, Row, Col, Value, NewBoard),
     switch_player(CurrentPlayer, NextPlayer).
 
-check_game_over([Board, CurrentPlayer], true) :-
+check_game_over([Board, CurrentPlayer]) :-
+    valid_moves([Board, 'White'], []),
+    valid_moves([Board, 'Black'], []),
+    write('GAME OVER'),
+    black_wins(Board),
+    write('Black player won!').
+
+check_game_over([Board, CurrentPlayer]) :-
     valid_moves([Board, 'White'], []),
     valid_moves([Board, 'Black'], []),
     write('GAME OVER').
 
+check_game_over([Board, CurrentPlayer]) :-
+    black_wins(Board),
+    write('Black player won!').
+
+/*check_game_over([Board, CurrentPlayer]) :-
+    white_wins(Board),
+    write('White player won!').*/
 
 
 choose_move([Board, CurrentPlayer], 0, Move) :- 
@@ -92,11 +106,11 @@ choose_move([Board, CurrentPlayer], 1, Move) :-
     random_member(Move, ValidMoves).
 
 game_cycle(GameState) :-
-    check_game_over(GameState, T),
-    T = true, !.
+    display_game(GameState), 
+    check_game_over(GameState).
 
-game_cycle(GameState) :-
-    display_game(GameState),  
+%game not over may proceed
+game_cycle(GameState) :- 
     choose_move(GameState, 0, Move),  
     move(GameState, Move, NewGameState),!, 
     game_cycle(NewGameState).  
