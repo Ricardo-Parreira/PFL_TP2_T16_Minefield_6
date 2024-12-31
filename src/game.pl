@@ -1,6 +1,7 @@
 :- consult(utils).
 :- consult(game_config).
 :- use_module(library(between)).
+:- use_module(library(random)).
 
 switch_player('Black', 'White').
 switch_player('White', 'Black').
@@ -103,7 +104,7 @@ choose_move([Board, CurrentPlayer,_], 0, Move) :-
 
 
 choose_move([Board, CurrentPlayer,_], 1, Move) :-
-    valid_moves([Board, CurrentPlayer], ValidMoves),
+    valid_moves([Board, CurrentPlayer,_], ValidMoves),
     random_member(Move, ValidMoves).
 
 game_cycle(GameState) :-
