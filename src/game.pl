@@ -69,23 +69,33 @@ move([Board, CurrentPlayer], [Row, Col], [NewBoard, NextPlayer]) :-
 check_game_over([Board, CurrentPlayer]) :-
     valid_moves([Board, 'White'], []),
     valid_moves([Board, 'Black'], []),
-    write('GAME OVER'),
-    black_wins(Board),
-    write('Black player won!').
+    vertical_wins(Board, b),
+    write('GAME OVER'), nl,
+    write('Black won!').
 
 check_game_over([Board, CurrentPlayer]) :-
     valid_moves([Board, 'White'], []),
     valid_moves([Board, 'Black'], []),
-    write('GAME OVER').
+    vertical_wins(Board, w),
+    write('GAME OVER'), nl,
+    write('White won!').
+
+check_game_over([Board, CurrentPlayer]) :-
+    valid_moves([Board, 'White'], []),
+    valid_moves([Board, 'Black'], []),
+    write('GAME OVER'), 
+    write('It is a draw!').
 
 check_game_over([Board, CurrentPlayer]) :-
     vertical_wins(Board, b),
-    write('Black player won!').
+    write('GAME OVER'), nl,
+    write('Black won!').
 
 check_game_over([Board, CurrentPlayer]) :-
     transpose(Board, Transposed),
     vertical_wins(Transposed, w),
-    write('White player won!').
+    write('GAME OVER'), nl,
+    write('White won!').
 
 
 choose_move([Board, CurrentPlayer], 0, Move) :- 
