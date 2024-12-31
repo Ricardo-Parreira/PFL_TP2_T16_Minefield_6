@@ -79,14 +79,17 @@ check_game_over([Board, CurrentPlayer,_]) :-
     valid_moves([Board, 'Black',_], []),
     write('GAME OVER').
 
+
 check_game_over([Board, CurrentPlayer,_]) :-
     vertical_wins(Board, b),
-    write('Black player won!').
+    write('GAME OVER'), nl,
+    write('Black won!').
 
 check_game_over([Board, CurrentPlayer,_]) :-
     transpose(Board, Transposed),
     vertical_wins(Transposed, w),
-    write('White player won!').
+    write('GAME OVER'), nl,
+    write('White won!').
 
 
 choose_move([Board, CurrentPlayer,_], 0, Move) :- 
