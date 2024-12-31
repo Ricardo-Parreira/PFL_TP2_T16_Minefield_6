@@ -68,17 +68,24 @@ move([Board, CurrentPlayer, Players], [Row, Col], [NewBoard, NextPlayer, Players
 
 
 check_game_over([Board, CurrentPlayer,_]) :-
-    valid_moves([Board, 'White',_], []),
-    valid_moves([Board, 'Black',_], []),
-    write('GAME OVER'),
-    black_wins(Board),
-    write('Black player won!').
+    valid_moves([Board, 'White'], []),
+    valid_moves([Board, 'Black'], []),
+    vertical_wins(Board, b),
+    write('GAME OVER'), nl,
+    write('Black won!').
 
 check_game_over([Board, CurrentPlayer,_]) :-
-    valid_moves([Board, 'White',_], []),
-    valid_moves([Board, 'Black',_], []),
-    write('GAME OVER').
+    valid_moves([Board, 'White'], []),
+    valid_moves([Board, 'Black'], []),
+    vertical_wins(Board, w),
+    write('GAME OVER'), nl,
+    write('White won!').
 
+check_game_over([Board, CurrentPlayer,_]) :-
+    valid_moves([Board, 'White'], []),
+    valid_moves([Board, 'Black'], []),
+    write('GAME OVER'), 
+    write('It is a draw!').
 
 check_game_over([Board, CurrentPlayer,_]) :-
     vertical_wins(Board, b),
@@ -93,15 +100,17 @@ check_game_over([Board, CurrentPlayer,_]) :-
 
 
 choose_move([Board, CurrentPlayer,_], 0, Move) :- 
+    repeat,
     write('Enter your move as Row,Col: '), 
     read(Input),
     parse_input(Input, Move), 
     valid_moves([Board, CurrentPlayer,_], ValidMoves),  
     ( member(Move, ValidMoves) ->  
+        !,
         true  
     ; 
         write('Invalid move. Please try again.'), nl,
-        choose_move([Board, CurrentPlayer,_], 0, Move)  
+        fail 
     ).
 
 
