@@ -175,29 +175,29 @@ neighbor_coords(Row, Col, Size, Neighbors) :-
     ).
 
 
-black_wins(Board) :-
+vertical_wins(Board, Colour) :-
     length(Board, Size),
     nth1(1, Board, FirstRow),
-    findall(StartCol, nth1(StartCol, FirstRow, b), BlackCols), % Find all black stones in the first row
-    member(StartCol, BlackCols),
-    dfs_black(Board, 1, StartCol, Size, []).        % Start DFS from each stone
+    findall(StartCol, nth1(StartCol, FirstRow, Colour), Cols), % Find all correct stones in the first row
+    member(StartCol, Cols),
+    dfs_vertical(Board, 1, StartCol, Size, [], Colour).        % Start DFS from each stone
 
-dfs_black(Board, Row, Col, Size, _) :-
+dfs_vertical(Board, Row, Col, Size, _, Colour) :-
     Row =:= Size,
     nth1(Row, Board, RowList),
-    nth1(Col, RowList, b). % Ensure we have a black stone in the last row
+    nth1(Col, RowList, Colour). % Ensure we have a stone in the last row
 
-dfs_black(Board, Row, Col, Size, Visited) :-
+dfs_vertical(Board, Row, Col, Size, Visited, Colour) :-
     neighbor_coords(Row, Col, Size, Neighbors),
-    explore_neighbors(Board, Neighbors, Size, [Row-Col | Visited]).
+    explore_neighbors(Board, Neighbors, Size, [Row-Col | Visited], Colour).
 
-explore_neighbors(_, [], _, _) :- fail.             
-explore_neighbors(Board, [Row-Col | Rest], Size, Visited) :-
+explore_neighbors(_, [], _, _, _) :- fail.             
+explore_neighbors(Board, [Row-Col | Rest], Size, Visited, Colour) :-
     \+ member(Row-Col, Visited),                   
     nth1(Row, Board, RowList),
-    nth1(Col, RowList, b),                         % Ensure the neighbor is a black stone
-    dfs_black(Board, Row, Col, Size, Visited);     % Continue DFS from this neighbor
-    explore_neighbors(Board, Rest, Size, Visited). % Explore the remaining neighbors
+    nth1(Col, RowList, Colour),                         % Ensure the neighbor is a correct stone
+    dfs_vertical(Board, Row, Col, Size, Visited, Colour);     % Continue DFS from this neighbor
+    explore_neighbors(Board, Rest, Size, Visited, Colour). % Explore the remaining neighbors
 
 
 
