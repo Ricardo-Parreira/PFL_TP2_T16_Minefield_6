@@ -79,11 +79,73 @@ hard_corner_pattern([empty, Opponent, Opponent, Player], Player, Opponent).
 hard_corner_pattern([Opponent, Player, Player, empty], Player, Opponent).
 hard_corner_pattern([Player, Opponent, Opponent, empty], Player, Opponent).
 
+creates_switch(Board, Row, Col, Player) :-
+    color(Player, PlayerColor),
+    switch_player(Player, Opponent),
+    color(Opponent, OpponentColor),
+    % Check for 2x3 areas
+    between(-1, 0, DR),
+    between(-2, 0, DC), 
+    StartRow is Row + DR,
+    StartCol is Col + DC,
+    within_bounds(Board, StartRow, StartCol),
+    within_bounds(Board, StartRow + 1, StartCol + 2), % Bounds for 2x3 area
+    get_switch_area_2x3(Board, StartRow, StartCol, SwitchArea2x3),
+    switch_pattern(SwitchArea2x3, PlayerColor, OpponentColor).
+
+creates_switch(Board, Row, Col, Player) :-
+    color(Player, PlayerColor),
+    switch_player(Player, Opponent),
+    color(Opponent, OpponentColor),
+    % Check for 2x4 areas
+    between(-1, 0, DR),
+    between(-3, 0, DC), 
+    StartRow is Row + DR,
+    StartCol is Col + DC,
+    within_bounds(Board, StartRow, StartCol),
+    within_bounds(Board, StartRow + 1, StartCol + 3), % Bounds for 2x4 area
+    get_switch_area_2x4(Board, StartRow, StartCol, SwitchArea2x4),
+    switch_pattern(SwitchArea2x4, PlayerColor, OpponentColor).
+
+get_switch_area_2x3(Board, StartRow, StartCol, [C1, C2, C3, C4, C5, C6]) :-
+    StartCol1 is StartCol + 1,
+    StartRow1 is StartRow + 1,
+    within_bounds(Board, StartRow, StartCol),
+    within_bounds(Board, StartRow, StartCol1),
+    within_bounds(Board, StartRow1, StartCol),
+    within_bounds(Board, StartRow1, StartCol1),
+    get_cell(Board, StartRow, StartCol, C1),         
+    get_cell(Board, StartRow, StartCol1, C5),       
+    get_cell(Board, StartRow1, StartCol, C3),      
+    get_cell(Board, StartRow1, StartCol1, C6),     
+    (within_bounds(Board, StartRow, StartCol + 2) -> get_cell(Board, StartRow, StartCol + 2, C2) ; C2 = empty), 
+    (within_bounds(Board, StartRow1, StartCol + 2) -> get_cell(Board, StartRow1, StartCol + 2, C4) ; C4 = empty). 
+
+get_switch_area_2x4(Board, StartRow, StartCol, [C1, C2, C3, C4, C5, C6, C7, C8]) :-
+    StartCol1 is StartCol + 1,
+    StartCol2 is StartCol + 2,
+    StartCol3 is StartCol + 3,
+    StartRow1 is StartRow + 1,
+    within_bounds(Board, StartRow, StartCol),
+    within_bounds(Board, StartRow1, StartCol),
+    get_cell(Board, StartRow, StartCol, C1),        % Top-left corner
+    (within_bounds(Board, StartRow, StartCol1) -> get_cell(Board, StartRow, StartCol1, C2) ; C2 = empty),  % Top second
+    (within_bounds(Board, StartRow, StartCol2) -> get_cell(Board, StartRow, StartCol2, C3) ; C3 = empty),  % Top third
+    (within_bounds(Board, StartRow, StartCol3) -> get_cell(Board, StartRow, StartCol3, C4) ; C4 = empty),  % Top-right corner
+    get_cell(Board, StartRow1, StartCol, C5),       % Bottom-left corner
+    (within_bounds(Board, StartRow1, StartCol1) -> get_cell(Board, StartRow1, StartCol1, C6) ; C6 = empty),  % Bottom second
+    (within_bounds(Board, StartRow1, StartCol2) -> get_cell(Board, StartRow1, StartCol2, C7) ; C7 = empty),  % Bottom third
+    (within_bounds(Board, StartRow1, StartCol3) -> get_cell(Board, StartRow1, StartCol3, C8) ; C8 = empty).  % Bottom-right corner
+
+
+switch_pattern([Player, empty, empty, empty, Opponent,  Player], Player, Opponent).
+switch_pattern([Opponent, empty, empty, empty, Player,  Opponent], Player, Opponent).
+
 is_valid_move(Board, Row, Col, Player) :-
     within_bounds(Board, Row, Col),
     cell_empty(Board, Row, Col),
-    \+ creates_hard_corner(Board, Row, Col, Player).
-    %\+ creates_switch(Board, Row, Col, Player).
+    \+ creates_hard_corner(Board, Row, Col, Player),
+    \+ creates_switch(Board, Row, Col, Player).
 
 valid_moves([Board, CurrentPlayer,_ | _], ValidMoves) :-
     findall([Row, Col], is_valid_move(Board, Row, Col, CurrentPlayer), ValidMoves).
