@@ -126,7 +126,6 @@ game_cycle(GameState) :-
 %game not over may proceed
 game_cycle(GameState) :- 
     get_difficulty_level(GameState, Difficulty),
-    write('Current player difficulty: '), write(Difficulty), nl,
     choose_move(GameState, Difficulty, Move),  
     move(GameState, Move, NewGameState),!, 
     game_cycle(NewGameState).  
