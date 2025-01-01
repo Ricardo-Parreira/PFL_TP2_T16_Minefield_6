@@ -6,6 +6,7 @@
 switch_player('Black', 'White').
 switch_player('White', 'Black').
 
+
 get_difficulty_level([_, CurrentPlayer, Players], Difficulty) :-
     member([CurrentPlayer, Difficulty], Players).
 
@@ -44,11 +45,44 @@ set_cell_in_row([Current|Rest], ColIndex, Value, [Current|NewRest]) :-
     NextColIndex is ColIndex - 1,  
     set_cell_in_row(Rest, NextColIndex, Value, NewRest). 
 
+get_cell(Board, Row, Col, Value) :-
+    nth1(Row, Board, RowList),  % Get the RowList at the specified Row
+    nth1(Col, RowList, Value).  % Get the Value at the specified Column in the RowList
+
+creates_hard_corner(Board, Row, Col, Player) :-
+    color(Player, PlayerColor),                 
+    switch_player(Player, Opponent),          
+    color(Opponent, OpponentColor),           
+    between(-1, 0, DR),                       
+    between(-1, 0, DC),
+    StartRow is Row + DR,                      
+    StartCol is Col + DC,
+    StartCol1 is StartCol+1,
+    StartRow1 is StartRow+1,
+    within_bounds(Board, StartRow, StartCol), 
+    within_bounds(Board, StartRow1, StartCol1),
+    get_cell(Board, StartRow, StartCol, V1),        
+    get_cell(Board, StartRow, StartCol1, V2),
+    get_cell(Board, StartRow1, StartCol, V3),
+    get_cell(Board, StartRow1, StartCol1, V4),
+    hard_corner_pattern([V1, V2, V3, V4], PlayerColor, OpponentColor). 
+
+hard_corner_pattern([Player, Opponent, empty, Player], Player, Opponent).
+hard_corner_pattern([Opponent, Player, empty, Opponent], Player, Opponent).
+
+hard_corner_pattern([Player, empty, Opponent, Player], Player, Opponent).
+hard_corner_pattern([Opponent, empty, Player, Opponent], Player, Opponent).
+
+hard_corner_pattern([empty, Player, Player, Opponent], Player, Opponent).
+hard_corner_pattern([empty, Opponent, Opponent, Player], Player, Opponent).
+
+hard_corner_pattern([Opponent, Player, Player, empty], Player, Opponent).
+hard_corner_pattern([Player, Opponent, Opponent, empty], Player, Opponent).
 
 is_valid_move(Board, Row, Col, Player) :-
     within_bounds(Board, Row, Col),
-    cell_empty(Board, Row, Col).
-    %\+ creates_hard_corner(Board, Row, Col, Player),
+    cell_empty(Board, Row, Col),
+    \+ creates_hard_corner(Board, Row, Col, Player).
     %\+ creates_switch(Board, Row, Col, Player).
 
 valid_moves([Board, CurrentPlayer,_ | _], ValidMoves) :-
