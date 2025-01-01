@@ -1,5 +1,6 @@
 :- consult(utils).
 :- consult(game_config).
+:- consult(greedy).
 :- use_module(library(between)).
 :- use_module(library(random)).
 
