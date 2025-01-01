@@ -88,9 +88,12 @@ creates_switch(Board, Row, Col, Player) :-
     between(-2, 0, DC), 
     StartRow is Row + DR,
     StartCol is Col + DC,
+    StartRow1 is StartRow + 1,
+    StartCol2 is StartCol + 2,
     within_bounds(Board, StartRow, StartCol),
-    within_bounds(Board, StartRow + 1, StartCol + 2), % Bounds for 2x3 area
+    within_bounds(Board, StartRow1, StartCol2), % Bounds for 2x3 area
     get_switch_area_2x3(Board, StartRow, StartCol, SwitchArea2x3),
+    write('Switch Area 2x3: '), write(SwitchArea2x3), nl,
     switch_pattern(SwitchArea2x3, PlayerColor, OpponentColor).
 
 creates_switch(Board, Row, Col, Player) :-
@@ -102,8 +105,10 @@ creates_switch(Board, Row, Col, Player) :-
     between(-3, 0, DC), 
     StartRow is Row + DR,
     StartCol is Col + DC,
+    StartRow1 is StartRow + 1,
+    StartCol3 is StartCol + 3,
     within_bounds(Board, StartRow, StartCol),
-    within_bounds(Board, StartRow + 1, StartCol + 3), % Bounds for 2x4 area
+    within_bounds(Board, StartRow1, StartCol3), % Bounds for 2x4 area
     get_switch_area_2x4(Board, StartRow, StartCol, SwitchArea2x4),
     switch_pattern(SwitchArea2x4, PlayerColor, OpponentColor).
 
@@ -114,12 +119,13 @@ get_switch_area_2x3(Board, StartRow, StartCol, [C1, C2, C3, C4, C5, C6]) :-
     within_bounds(Board, StartRow, StartCol1),
     within_bounds(Board, StartRow1, StartCol),
     within_bounds(Board, StartRow1, StartCol1),
-    get_cell(Board, StartRow, StartCol, C1),         
-    get_cell(Board, StartRow, StartCol1, C5),       
-    get_cell(Board, StartRow1, StartCol, C3),      
-    get_cell(Board, StartRow1, StartCol1, C6),     
-    (within_bounds(Board, StartRow, StartCol + 2) -> get_cell(Board, StartRow, StartCol + 2, C2) ; C2 = empty), 
-    (within_bounds(Board, StartRow1, StartCol + 2) -> get_cell(Board, StartRow1, StartCol + 2, C4) ; C4 = empty). 
+    get_cell(Board, StartRow, StartCol, C1),        % Top-left
+    get_cell(Board, StartRow, StartCol1, C3),       % Top-right
+    get_cell(Board, StartRow1, StartCol, C4),       % Bottom-left
+    get_cell(Board, StartRow1, StartCol1, C6),      % Bottom-right
+    (StartCol2 is StartCol + 2, within_bounds(Board, StartRow, StartCol2) -> get_cell(Board, StartRow, StartCol2, C2) ; C2 = empty),
+    (StartCol2 is StartCol + 2, within_bounds(Board, StartRow1, StartCol2) -> get_cell(Board, StartRow1, StartCol2, C5) ; C5 = empty).
+
 
 get_switch_area_2x4(Board, StartRow, StartCol, [C1, C2, C3, C4, C5, C6, C7, C8]) :-
     StartCol1 is StartCol + 1,
@@ -138,8 +144,8 @@ get_switch_area_2x4(Board, StartRow, StartCol, [C1, C2, C3, C4, C5, C6, C7, C8])
     (within_bounds(Board, StartRow1, StartCol3) -> get_cell(Board, StartRow1, StartCol3, C8) ; C8 = empty).  % Bottom-right corner
 
 
-switch_pattern([Player, empty, empty, empty, Opponent,  Player], Player, Opponent).
-switch_pattern([Opponent, empty, empty, empty, Player,  Opponent], Player, Opponent).
+switch_pattern([Player, empty, Opponent, Opponent, empty,  Player], Player, Opponent).
+switch_pattern([Opponent, empty, Player, Player, empty,  Opponent], Player, Opponent).
 
 is_valid_move(Board, Row, Col, Player) :-
     within_bounds(Board, Row, Col),
