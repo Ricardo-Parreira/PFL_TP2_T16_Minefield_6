@@ -93,7 +93,6 @@ creates_switch(Board, Row, Col, Player) :-
     within_bounds(Board, StartRow, StartCol),
     within_bounds(Board, StartRow1, StartCol2), % Bounds for 2x3 area
     get_switch_area_2x3(Board, StartRow, StartCol, SwitchArea2x3),
-    write('Switch Area 2x3: '), write(SwitchArea2x3), nl,
     switch_pattern(SwitchArea2x3, PlayerColor, OpponentColor).
 
 creates_switch(Board, Row, Col, Player) :-
@@ -120,11 +119,11 @@ get_switch_area_2x3(Board, StartRow, StartCol, [C1, C2, C3, C4, C5, C6]) :-
     within_bounds(Board, StartRow1, StartCol),
     within_bounds(Board, StartRow1, StartCol1),
     get_cell(Board, StartRow, StartCol, C1),        % Top-left
-    get_cell(Board, StartRow, StartCol1, C3),       % Top-right
+    get_cell(Board, StartRow, StartCol1, C2),      
     get_cell(Board, StartRow1, StartCol, C4),       % Bottom-left
-    get_cell(Board, StartRow1, StartCol1, C6),      % Bottom-right
-    (StartCol2 is StartCol + 2, within_bounds(Board, StartRow, StartCol2) -> get_cell(Board, StartRow, StartCol2, C2) ; C2 = empty),
-    (StartCol2 is StartCol + 2, within_bounds(Board, StartRow1, StartCol2) -> get_cell(Board, StartRow1, StartCol2, C5) ; C5 = empty).
+    get_cell(Board, StartRow1, StartCol1, C5),      
+    (StartCol2 is StartCol + 2, within_bounds(Board, StartRow, StartCol2) -> get_cell(Board, StartRow, StartCol2, C3) ; C2 = empty), % Top-right
+    (StartCol2 is StartCol + 2, within_bounds(Board, StartRow1, StartCol2) -> get_cell(Board, StartRow1, StartCol2, C6) ; C5 = empty). % Bottom-right
 
 
 get_switch_area_2x4(Board, StartRow, StartCol, [C1, C2, C3, C4, C5, C6, C7, C8]) :-
@@ -146,6 +145,10 @@ get_switch_area_2x4(Board, StartRow, StartCol, [C1, C2, C3, C4, C5, C6, C7, C8])
 
 switch_pattern([Player, empty, Opponent, Opponent, empty,  Player], Player, Opponent).
 switch_pattern([Opponent, empty, Player, Player, empty,  Opponent], Player, Opponent).
+
+switch_pattern([Player, empty, empty, Opponent, Opponent, empty, empty,  Player], Player, Opponent).
+switch_pattern([Opponent, empty, empty, Player, Player, empty, empty, Opponent], Player, Opponent).
+
 
 is_valid_move(Board, Row, Col, Player) :-
     within_bounds(Board, Row, Col),
