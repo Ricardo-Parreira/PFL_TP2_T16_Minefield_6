@@ -113,7 +113,7 @@ score_calculator(OldRow, NextRow, OldScore, NewScore) :-
 
 /* auxiliary stuff */
 
-%check if a stone is completely blocked and cannot create any connection
+%check if a stone is completely blocked and cannot create any connection because no cordinates near it are valid
 is_blocked_completely(Board, Row-Col, Size, Colour) :-
     neighbor_coords(Row, Col, Size, Neighbors),
     get_surrounding_moves(Board, Colour, Neighbors, [], Surrounding),
