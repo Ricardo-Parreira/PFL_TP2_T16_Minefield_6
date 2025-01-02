@@ -43,6 +43,17 @@ progression_score_calc(Board, Colour, Score):-
     length(BottomList, BotScore),
     Score is TopScore + BotScore.
 
+/* Calculate the score based on the potential a piece has to create connections */
+potential_score(Board, Colour, TotalScore) :-
+    length(Board, Size), 
+    findall(Score, (
+        nth1(Row, Board, RowList),      % For each row
+        nth1(Col, RowList, Colour),          % For each correct stone in the row
+        neighbor_coords(Row, Col, Size, Neighbors),
+        get_surrounding_moves(Board, Colour, Neighbors, [], Surrounding),
+        length(Surrounding, Score) %gets the number of free spaces surrounding the piece
+    ), AllScores),
+    list_sum(AllScores, TotalScore).
 
 /* calculate the score based on the different paths it has, how big they are and if they move optimally in the right direction*/
 connection_score(Board, Colour, TotalScore) :-
@@ -124,7 +135,7 @@ get_surrounding_moves(_, _, [], Surrounding, Surrounding). % no more neighbors
 % add if valid
 get_surrounding_moves(Board, Colour, [Row-Col|Rest], Sur, Surrounding) :-
     is_valid_move(Board, Row, Col, Colour),
-    Sur1 is [Row-Col|Sur],
+    Sur1 = [Row-Col|Sur],
     get_surrounding_moves(Board, Colour, Rest, Sur1, Surrounding).
 %skip if not valid
 get_surrounding_moves(Board, Colour, [Row-Col|Rest], Sur, Surrounding) :-
