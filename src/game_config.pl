@@ -15,34 +15,47 @@ choose_game_type(_) :-
 valid_game_type(Type) :-
     between(1, 4, Type).
 
-valid_board_size(BoardSize):-
-    BoardSize = 10. 
-valid_board_size(BoardSize):-
-    BoardSize = 13.
-valid_board_size(BoardSize):-
-    BoardSize = 16. 
 configure_game(Type, Config) :-
+    get_board_size(BoardSize),
+    get_difficulty(Type, Difficulty),
+    Config = [Type, BoardSize, Difficulty].
+
+get_board_size(BoardSize) :-
     write('Enter board size (10, 13 or 16): '), nl,
     repeat,
     read_number(BoardSize),
-    ( valid_board_size(BoardSize)
-    -> !  
-    ; write('Invalid board size, please try again.'), nl,
-      fail
-    ),
-    (   (Type == 2 ; Type == 3 ; Type == 4)
-    ->  write('Enter difficulty level (1: Random, 2: Hard): '), nl,
-        repeat,
-        read_number(Difficulty),
-        (   between(1, 2, Difficulty)
-        ->  !  
-        ;   write('Invalid choice, please try again.'), nl,
-            fail  
-        )
-    ;   Difficulty = none
-    ),
-    
-    Config = [Type, BoardSize, Difficulty].
+    valid_board_size(BoardSize), !. % Cut after valid input to stop backtracking.
+
+get_board_size(_) :-
+    write('Invalid board size, please try again.'), nl,
+    get_board_size(_).
+
+get_difficulty(Type, Difficulty) :-
+    requires_difficulty(Type),
+    ask_difficulty(Difficulty).
+
+get_difficulty(Type, none) :-
+    \+ requires_difficulty(Type).
+
+ask_difficulty(Difficulty) :-
+    write('Enter difficulty level (1: Random, 2: Hard): '), nl,
+    repeat,
+    read_number(Difficulty),
+    valid_difficulty(Difficulty), !. % Cut after valid input to stop backtracking.
+
+ask_difficulty(_) :-
+    write('Invalid choice, please try again.'), nl,
+    ask_difficulty(_).
+
+valid_board_size(BoardSize) :-
+    member(BoardSize, [10, 13, 16]).
+
+valid_difficulty(Difficulty) :-
+    member(Difficulty, [1, 2]).
+
+requires_difficulty(Type) :-
+    member(Type, [2, 3, 4]).
+
 
 
 
