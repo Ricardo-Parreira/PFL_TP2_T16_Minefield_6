@@ -4,13 +4,17 @@ game_type(N) :-
     write(N), nl.
 
 choose_game_type(Type) :-
-    repeat,
     read_number(Type),
-    (   between(1, 4, Type)
-    ->  game_type(Type),!
-    ;   write('Invalid choice, please try again.'), nl,
-        fail 
-    ).
+    valid_game_type(Type),
+    game_type(Type).
+
+choose_game_type(_) :-
+    write('Invalid choice, please try again.'), nl,
+    choose_game_type(_).
+
+valid_game_type(Type) :-
+    between(1, 4, Type).
+
 valid_board_size(BoardSize):-
     BoardSize = 10. 
 valid_board_size(BoardSize):-
