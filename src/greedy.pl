@@ -1,5 +1,6 @@
 :-consult(utils).
 
+%get opponent
 opponent(b, w).
 opponent(w, b).
 
@@ -43,7 +44,7 @@ progression_score_calc(Board, Colour, Score):-
     Score is TopScore + BotScore.
 
 
-% calculate the score based on ...
+/* calculate the score based on the different paths it has, how big they are and if they move optimally in the right direction*/
 connection_score(Board, Colour, TotalScore) :-
     length(Board, Size), 
     findall(Score, (
@@ -67,13 +68,15 @@ dfs_score(Board, OldRow-OldCol, Row-Col, Size, Visited, Colour, CurrentScore, Fi
     score_calculator(OldRow, Row, CurrentScore, NewScore),
     explore_neighbors_score(Board, Neighbors, Size, [Row-Col | Visited], Colour, Row-Col, NewScore, FinalScore).
 
-explore_neighbors_score(_, [], _, _, _, _, AccumulatedScore, AccumulatedScore). % Base case: No more neighbors to explore.
+% Base case: No more neighbors to explore.
+explore_neighbors_score(_, [], _, _, _, _, AccumulatedScore, AccumulatedScore). 
 explore_neighbors_score(Board, [NextRow-NextCol | Rest], Size, Visited, Colour, Row-Col, CurrentScore, FinalScore) :-
     \+ member(NextRow-NextCol, Visited),
     nth1(NextRow, Board, RowList),
     nth1(NextCol, RowList, Colour), % visit point only if it has a piece of correct colour
     dfs_score(Board, Row-Col, NextRow-NextCol, Size, Visited, Colour, CurrentScore, NeighborScore), % Continue DFS
     explore_neighbors_score(Board, Rest, Size, Visited, Colour, Row-Col, NeighborScore, FinalScore). % Process the rest of the neighbors of the piece at Row-Col
+
 %if a neighbour doesnt have the right stone in it continue
 explore_neighbors_score(Board, [NextRow-NextCol | Rest], Size, Visited, Colour, Row-Col, CurrentScore, FinalScore) :-
     nth1(NextRow, Board, RowList),
@@ -107,3 +110,29 @@ score_calculator(OldRow, NextRow, OldScore, NewScore) :-
     RowDiff is NextRow - OldRow,
     RowDiff =:= 0,
     NewScore is OldScore * 1.005.
+
+/* auxiliary stuff */
+
+%check if a stone is completely blocked and cannot create any connection
+is_blocked_completely(Board, Row-Col, Size, Colour) :-
+    neighbor_coords(Row, Col, Size, Neighbors),
+    get_surrounding_moves(Board, Colour, Neighbors, [], Surrounding),
+    Surrounding = []. %it is blocked completely if it has no valid moves around it
+
+% get valid moves from a list of neighboring coordinates
+get_surrounding_moves(_, _, [], Surrounding, Surrounding). % no more neighbors
+% add if valid
+get_surrounding_moves(Board, Colour, [Row-Col|Rest], Sur, Surrounding) :-
+    is_valid_move(Board, Row, Col, Colour),
+    Sur1 is [Row-Col|Sur],
+    get_surrounding_moves(Board, Colour, Rest, Sur1, Surrounding).
+%skip if not valid
+get_surrounding_moves(Board, Colour, [Row-Col|Rest], Sur, Surrounding) :-
+    \+ is_valid_move(Board, Row, Col, Colour),
+    get_surrounding_moves(Board, Colour, Rest, Sur, Surrounding).
+
+% to check if a list is a subset of another list
+list_subset([], _). % Base case: empty list is always a subset
+list_subset([X|Rest], List2) :-
+    select(X, List2, ReducedList2), % Remove one occurrence of X from List2
+    list_subset(Rest, ReducedList2). % Recursively check the rest
