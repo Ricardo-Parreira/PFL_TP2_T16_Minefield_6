@@ -220,10 +220,16 @@ choose_move([Board, CurrentPlayer,_], 0, Move) :-
     ).
 
 
-
+% random bot move
 choose_move([Board, CurrentPlayer,_], 1, Move) :-
     valid_moves([Board, CurrentPlayer,_], ValidMoves),
     random_member(Move, ValidMoves).
+
+% hard bot move
+choose_move(GameState, 2, Move) :-
+    valid_moves(GameState, ValidMoves),
+    best_moves(GameState, ValidMoves, 0, [], BestMoves),
+    random_member(Move, BestMoves). %choose randomly from the best moves to make it less predictable
 
 game_cycle(GameState) :-
     display_game(GameState), 

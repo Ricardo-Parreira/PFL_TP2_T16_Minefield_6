@@ -5,32 +5,69 @@ opponent(b, w).
 opponent(w, b).
 
 % base cases for when the game ends
-value([Board, _, _], Player, 10000) :-
-    Player = b,
+value([Board, _, _], b, 10000) :-
     vertical_wins(Board, b), !.
 
-value([Board, _, _], Player, 10000) :-
-    Player = w,
+value([Board, _, _], w, 10000) :-
     transpose(Board, Transposed),
     vertical_wins(Transposed, w), !.
 
 value([Board, _, _], Player, -10000) :-
     opponent(Player, Opponent),
-    value([Board, _, _], Opponent, 1), !.
+    value([Board, _, _], Opponent, 10000), !.
 
 % value for intermediate states
-value([Board, _, _], Player, Value) :-
-    progression_score(Board, Player, ProgressionScore),
+value([Board, _, _], b, Value) :-
+    %progression_score(Board, Player, ProgressionScore),
     connection_score(Board, Player, ConnectionScore),
-    blocking_score(Board, Player, BlockingScore),
-    Value is ProgressionScore + ConnectionScore + BlockingScore.
+    potential_score(Board, Player, PotentialScore),
+    Value is ConnectionScore + PotentialScore.
 
-% calculate the progression score based on how the pieces occupy the goal edges
+value([Board, _, _], w, Value) :-
+    transpose(Board, Transposed),
+    %progression_score(Transposed, Player, ProgressionScore),
+    connection_score(Transposed, Player, ConnectionScore),
+    write('ConnectionScore: '),write(ConnectionScore), nl,
+    potential_score(Transposed, Player, PotentialScore),
+    write('PotentialScore: '),write(PotentialScore), nl,
+    Value is ConnectionScore + PotentialScore.
+
+/*get the best move acoording to value */
+%base case no more moves to explore
+best_moves(_, [], _, Moves, Moves).
+
+%the value of the new play is the same as the max score so we add the move to the list
+best_moves([Board, CurrentPlayer, _], [Move|Rest], MaxValue, Temp, Moves) :-
+    color(CurrentPlayer, Colour),
+    move([Board, CurrentPlayer, _], Move, NewGameState),
+    value(NewGameState, Colour, Value),
+    Value =:= MaxValue,
+    best_moves([Board, CurrentPlayer, _], Rest, MaxValue, [Move | Temp], Moves).
+
+%the value of the new play is greater than the max score so it is now the best move
+best_moves([Board, CurrentPlayer, _], [Move|Rest], MaxValue, Temp, Moves) :-
+    color(CurrentPlayer, Colour),
+    write(Colour),
+    move([Board, CurrentPlayer, _], Move, NewGameState),
+    value(NewGameState, Colour, Value),
+    Value > MaxValue,
+    best_moves([Board, CurrentPlayer, _], Rest, Value, [Move], Moves).
+
+%the value of the new play is less than the max score so we skip this one
+best_moves([Board, CurrentPlayer, _], [Move|Rest], MaxValue, Temp, Moves) :-
+    color(CurrentPlayer, Colour),
+    move([Board, CurrentPlayer, _], Move, NewGameState),
+    value(NewGameState, Colour, Value),
+    Value < MaxValue,
+    best_moves([Board, CurrentPlayer, _], Rest, MaxValue, Temp, Moves).
+
+
+/* calculate the progression score based on how the pieces occupy the goal edges*/
 progression_score(Board, b, Score):-
-    progression_score_calc(Board, Colour, Score).
+    progression_score_calc(Board, b, Score).
 progression_score(Board, w, Score) :-
     transpose(Board, Transposed),
-    progression_score_calc(Transposed, Colour, Score).
+    progression_score_calc(Transposed, w, Score).
 
 %default vertical calculator, will transpose board for white
 progression_score_calc(Board, Colour, Score):-
@@ -106,14 +143,14 @@ score_calculator(OldRow, NextRow, OldScore, NewScore) :-
     write('calculating for '), write(OldRow-NextRow), nl,
     RowDiff is NextRow - OldRow,
     RowDiff =:= 1,
-    NewScore is OldScore + 1,
+    NewScore is OldScore + 100,
     write('scores: '), write(OldScore-NewScore), nl.
 
 % add 1 when moving upwards
 score_calculator(OldRow, NextRow, OldScore, NewScore) :-
     RowDiff is NextRow - OldRow,
     RowDiff =:= -1,
-    NewScore is OldScore - 1.
+    NewScore is OldScore - 100.
 
 % multiply by 1.005 when it goes in a neutral direction
 %if it hasnt moved towards the goal yet the score will remain 0
