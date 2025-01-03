@@ -66,7 +66,16 @@ creates_hard_corner(Board, Row, Col, Player) :-
     get_cell(Board, StartRow, StartCol1, V2),
     get_cell(Board, StartRow1, StartCol, V3),
     get_cell(Board, StartRow1, StartCol1, V4),
-    hard_corner_pattern([V1, V2, V3, V4], PlayerColor, OpponentColor). 
+    simulate_move_in_pattern([V1, V2, V3, V4], PlayerColor, OpponentColor, Row, Col, StartRow, StartCol).
+    
+simulate_move_in_pattern([V1, V2, V3, V4], PlayerColor, OpponentColor, Row, Col, StartRow, StartCol) :-
+    % Simulate the effect of placing the player color
+    (Row =:= StartRow, Col =:= StartCol -> NV1 = PlayerColor ; NV1 = V1),
+    (Row =:= StartRow, Col =:= StartCol + 1 -> NV2 = PlayerColor ; NV2 = V2),
+    (Row =:= StartRow + 1, Col =:= StartCol -> NV3 = PlayerColor ; NV3 = V3),
+    (Row =:= StartRow + 1, Col =:= StartCol + 1 -> NV4 = PlayerColor ; NV4 = V4),
+    % Check for hard corner pattern after simulated move
+    hard_corner_pattern([NV1, NV2, NV3, NV4], PlayerColor, OpponentColor).
 
 hard_corner_pattern([Player, Opponent, empty, Player], Player, Opponent).
 hard_corner_pattern([Opponent, Player, empty, Opponent], Player, Opponent).
