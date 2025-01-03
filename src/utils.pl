@@ -29,7 +29,17 @@ create_board(Element, Size, Board):-
 
 print_item(Item) :-
     char(Item,New),
-    write(New). 
+    write(New).
+
+abs(Raw, Raw):-
+    Raw >= 0.
+abs(Raw, Abs):-
+    Raw < 0,
+    Abs is 0 - Raw.
+
+% from class
+list_sum([], 0).
+list_sum([H | T], Sum) :- list_sum(T, S1), Sum is S1 + H.
 
 print_full_list([]) :-
     nl.  
@@ -44,7 +54,7 @@ print_board([]).
 
 print_board([Row|Rest]) :-
     print_full_list(Row),  
-    print_board(Rest).  
+    print_board(Rest).
 
 /* ############ DRAW THE MENU ############## */
 
@@ -167,9 +177,9 @@ neighbor_coords(Row, Col, Size, Neighbors) :-
     findall(
         R-C,
         (
-            neighbor(Row, Col, R, C),       % Get a neighbor.
-            R > 0, R =< Size,               % Row is within bounds.
-            C > 0, C =< Size                % Column is within bounds.
+            neighbor(Row, Col, R, C),       % Get a neighbor
+            R > 0, R =< Size,               % Row is within bounds
+            C > 0, C =< Size                % Column is within bounds
         ),
         Neighbors
     ).
