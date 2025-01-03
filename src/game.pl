@@ -103,7 +103,7 @@ creates_switch(Board, Row, Col, Player) :-
     within_bounds(Board, StartRow, StartCol),
     within_bounds(Board, StartRow1, StartCol2), % Bounds for 2x3 area
     get_switch_area_2x3(Board, StartRow, StartCol, SwitchArea2x3),
-    switch_pattern(SwitchArea2x3, PlayerColor, OpponentColor).
+    simulate_move_in_switch_2x3(SwitchArea2x3, PlayerColor, OpponentColor, Row, Col, StartRow, StartCol).
 
 creates_switch(Board, Row, Col, Player) :-
     color(Player, PlayerColor),
@@ -119,7 +119,7 @@ creates_switch(Board, Row, Col, Player) :-
     within_bounds(Board, StartRow, StartCol),
     within_bounds(Board, StartRow1, StartCol3), % Bounds for 2x4 area
     get_switch_area_2x4(Board, StartRow, StartCol, SwitchArea2x4),
-    switch_pattern(SwitchArea2x4, PlayerColor, OpponentColor).
+    simulate_move_in_switch_2x4(SwitchArea2x4, PlayerColor, OpponentColor, Row, Col, StartRow, StartCol).
 
 get_switch_area_2x3(Board, StartRow, StartCol, [C1, C2, C3, C4, C5, C6]) :-
     StartCol1 is StartCol + 1,
@@ -152,6 +152,34 @@ get_switch_area_2x4(Board, StartRow, StartCol, [C1, C2, C3, C4, C5, C6, C7, C8])
     (within_bounds(Board, StartRow1, StartCol2) -> get_cell(Board, StartRow1, StartCol2, C7) ; C7 = empty),  % Bottom third
     (within_bounds(Board, StartRow1, StartCol3) -> get_cell(Board, StartRow1, StartCol3, C8) ; C8 = empty).  % Bottom-right corner
 
+% Simulate move in a 2x3 region
+simulate_move_in_switch_2x3([V1, V2, V3, V4, V5, V6], PlayerColor, OpponentColor, Row, Col, StartRow, StartCol) :-
+    StartCol1 is StartCol + 1,
+    StartCol2 is StartCol + 2,
+    StartRow1 is StartRow + 1,
+    (Row =:= StartRow, Col =:= StartCol -> NV1 = PlayerColor ; NV1 = V1),
+    (Row =:= StartRow, Col =:= StartCol1 -> NV2 = PlayerColor ; NV2 = V2),
+    (Row =:= StartRow, Col =:= StartCol2 -> NV3 = PlayerColor ; NV3 = V3),
+    (Row =:= StartRow1, Col =:= StartCol -> NV4 = PlayerColor ; NV4 = V4),
+    (Row =:= StartRow1, Col =:= StartCol1 -> NV5 = PlayerColor ; NV5 = V5),
+    (Row =:= StartRow1, Col =:= StartCol2 -> NV6 = PlayerColor ; NV6 = V6),
+    switch_pattern([NV1, NV2, NV3, NV4, NV5, NV6], PlayerColor, OpponentColor).
+
+% Simulate move in a 2x4 region
+simulate_move_in_switch_2x4([V1, V2, V3, V4, V5, V6, V7, V8], PlayerColor, OpponentColor, Row, Col, StartRow, StartCol) :-
+    StartCol1 is StartCol + 1,
+    StartCol2 is StartCol + 2,
+    StartCol3 is StartCol + 3,
+    StartRow1 is StartRow + 1,
+    (Row =:= StartRow, Col =:= StartCol -> NV1 = PlayerColor ; NV1 = V1),
+    (Row =:= StartRow, Col =:= StartCol1 -> NV2 = PlayerColor ; NV2 = V2),
+    (Row =:= StartRow, Col =:= StartCol2 -> NV3 = PlayerColor ; NV3 = V3),
+    (Row =:= StartRow, Col =:= StartCol3 -> NV4 = PlayerColor ; NV4 = V4),
+    (Row =:= StartRow1, Col =:= StartCol -> NV5 = PlayerColor ; NV5 = V5),
+    (Row =:= StartRow1, Col =:= StartCol1 -> NV6 = PlayerColor ; NV6 = V6),
+    (Row =:= StartRow1, Col =:= StartCol2 -> NV7 = PlayerColor ; NV7 = V7),
+    (Row =:= StartRow1, Col =:= StartCol3 -> NV8 = PlayerColor ; NV8 = V8),
+    switch_pattern([NV1, NV2, NV3, NV4, NV5, NV6, NV7, NV8], PlayerColor, OpponentColor).
 
 switch_pattern([Player, empty, Opponent, Opponent, empty,  Player], Player, Opponent).
 switch_pattern([Opponent, empty, Player, Player, empty,  Opponent], Player, Opponent).
