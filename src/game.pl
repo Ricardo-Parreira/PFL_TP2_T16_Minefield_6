@@ -242,13 +242,15 @@ check_game_over([Board, CurrentPlayer,_]) :-
     write('White won!').
 
 
-choose_move([Board, CurrentPlayer,_], 0, Move) :- 
+choose_move([Board, CurrentPlayer,_], 0, TranslatedMove) :- 
     repeat,
-    write('Enter your move as Row,Col: '), 
+    write('Enter your move as Row,Col (e.g., 1,1): '), 
     read(Input),
-    parse_input(Input, Move), 
+    parse_input(Input, Move),  % Parse the input [Row,Col] to Move
+    translate_input(Move, TranslatedMove, Board),  % Translate the input coordinates
+    write(TranslatedMove),
     valid_moves([Board, CurrentPlayer,_], ValidMoves),  
-    ( member(Move, ValidMoves) ->  
+    ( member(TranslatedMove, ValidMoves) ->  
         !,
         true  
     ; 
