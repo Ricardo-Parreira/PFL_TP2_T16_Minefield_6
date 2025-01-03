@@ -18,19 +18,17 @@ value([Board, _, _], Player, -10000) :-
 
 % value for intermediate states
 value([Board, _, _], b, Value) :-
-    %progression_score(Board, Player, ProgressionScore),
-    connection_score(Board, Player, ConnectionScore),
-    potential_score(Board, Player, PotentialScore),
-    Value is ConnectionScore + PotentialScore.
+    progression_score(Board, b, ProgressionScore),
+    %connection_score(Board, b, ConnectionScore),
+    potential_score(Board, b, PotentialScore),
+    Value is ProgressionScore + PotentialScore.
 
 value([Board, _, _], w, Value) :-
     transpose(Board, Transposed),
-    %progression_score(Transposed, Player, ProgressionScore),
-    connection_score(Transposed, Player, ConnectionScore),
-    write('ConnectionScore: '),write(ConnectionScore), nl,
-    potential_score(Transposed, Player, PotentialScore),
-    write('PotentialScore: '),write(PotentialScore), nl,
-    Value is ConnectionScore + PotentialScore.
+    progression_score(Transposed, w, ProgressionScore),
+    connection_score(Transposed, w, ConnectionScore),
+    potential_score(Transposed, w, PotentialScore),
+    Value is ProgressionScore + PotentialScore + ConnectionScore.
 
 /*get the best move acoording to value */
 %base case no more moves to explore
@@ -47,7 +45,6 @@ best_moves([Board, CurrentPlayer, _], [Move|Rest], MaxValue, Temp, Moves) :-
 %the value of the new play is greater than the max score so it is now the best move
 best_moves([Board, CurrentPlayer, _], [Move|Rest], MaxValue, Temp, Moves) :-
     color(CurrentPlayer, Colour),
-    write(Colour),
     move([Board, CurrentPlayer, _], Move, NewGameState),
     value(NewGameState, Colour, Value),
     Value > MaxValue,
@@ -73,12 +70,13 @@ progression_score(Board, w, Score) :-
 progression_score_calc(Board, Colour, Score):-
     length(Board, Size),
     nth1(1 ,Board, TopRowList),
-    findall(Colour, TopRowList, TopList),
     nth1(Size, Board, BottomRowList),
-    findall(Colour, BottomRowList, BotttomList),
+    include(=(Colour), TopRowList, TopList), % Filter elements matching Colour
+    include(=(Colour), BottomRowList, BottomList), % Filter elements matching Colour
     length(TopList, TopScore),
     length(BottomList, BotScore),
     Score is TopScore + BotScore.
+
 
 /* Calculate the score based on the potential a piece has to create connections */
 potential_score(Board, Colour, TotalScore) :-
