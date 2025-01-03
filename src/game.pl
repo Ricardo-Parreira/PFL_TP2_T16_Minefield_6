@@ -248,7 +248,7 @@ choose_move([Board, CurrentPlayer, Players], _, [Board, NextPlayer, Players]) :-
 % If valid moves exist and the difficulty is 0 (human player), get user input
 choose_move([Board, CurrentPlayer,_], 0, TranslatedMove) :- 
     repeat,                                              % Repeat until a valid move is made
-    write('Enter your move as Row,Col (e.g., 1,1): '),    % Prompt the user to enter a move
+    write('Enter your move as (Row,Col) , Row-Col or [Row, Col]: '),    % Prompt the user to enter a move
     read(Input),                                         % Read the input from the user
     parse_input(Input, Move),                            % Parse the input into [Row,Col] format
     translate_input(Move, TranslatedMove, Board),        % Translate the input coordinates into a valid move

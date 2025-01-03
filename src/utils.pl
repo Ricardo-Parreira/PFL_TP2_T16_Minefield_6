@@ -156,7 +156,7 @@ parse_input([Row, Col], [Row, Col]) :-
     integer(Row), integer(Col), !.  
 
 parse_input(_, _) :- 
-    write('Invalid input format. Use (Row,Col) or Row-Col or [Row, Col].'), nl, 
+    write('Invalid input format. Use (Row,Col) , Row-Col or [Row, Col].'), nl, 
     fail.  
 translate_input([Row, Col], [TranslatedRow, Col], Board) :-
     % Get the number of rows and columns in the board.
