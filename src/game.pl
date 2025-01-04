@@ -8,10 +8,10 @@ switch_player('Black', 'White').
 switch_player('White', 'Black').
 
 
-get_difficulty_level([_, CurrentPlayer, Players], Difficulty) :-
+get_difficulty_level([_, CurrentPlayer, Players,_], Difficulty) :-
     member([CurrentPlayer, Difficulty], Players).
 
-display_game([Board, Player, _]) :- 
+display_game([Board, Player, _,_]) :- 
     nl,                              % Add an extra newline for visual separation
     write('Current Player: '),       % Display the label for the current player
     write(Player),                   % Output the name of the current player
@@ -188,34 +188,37 @@ switch_pattern([Opponent, empty, Player, Player, empty,  Opponent], Player, Oppo
 switch_pattern([Player, empty, empty, Opponent, Opponent, empty, empty,  Player], Player, Opponent).
 switch_pattern([Opponent, empty, empty, Player, Player, empty, empty, Opponent], Player, Opponent).
 
+is_valid_move(Board, Row, Col, Player ,1) :-
+    within_bounds(Board, Row, Col),
+    cell_empty(Board, Row, Col).
 
-is_valid_move(Board, Row, Col, Player) :-
+is_valid_move(Board, Row, Col, Player ,2) :-
     within_bounds(Board, Row, Col),
     cell_empty(Board, Row, Col),
     \+ creates_hard_corner(Board, Row, Col, Player),
     \+ creates_switch(Board, Row, Col, Player).
 
-valid_moves([Board, CurrentPlayer, _ | _], ValidMoves) :-
-    findall([Row, Col], is_valid_move(Board, Row, Col, CurrentPlayer), ValidMoves).  
+valid_moves([Board, CurrentPlayer, _ , Mode | _], ValidMoves) :-
+    findall([Row, Col], is_valid_move(Board, Row, Col, CurrentPlayer , Mode), ValidMoves).  
     % Generate a list of all valid moves for the current player by finding rows and columns where a move is valid on the current board.
 
-move([Board, CurrentPlayer, Players], [Row, Col], [NewBoard, NextPlayer, Players]) :-
-    valid_moves([Board, CurrentPlayer, Players], ValidMoves),     % Get the list of all valid moves for the current player
+move([Board, CurrentPlayer, Players,Mode], [Row, Col], [NewBoard, NextPlayer, Players,Mode]) :-
+    valid_moves([Board, CurrentPlayer, Players,Mode], ValidMoves),     % Get the list of all valid moves for the current player
     member([Row, Col], ValidMoves),                              % Ensure the desired move is in the list of valid moves
     color(CurrentPlayer, Value),                                 % Get the value/color associated with the current player
     set_cell(Board, Row, Col, Value, NewBoard),                  % Update the board with the players move
     switch_player(CurrentPlayer, NextPlayer).                    % Switch to the next player
 
-game_over([Board, CurrentPlayer,_], b) :-
+game_over([Board, CurrentPlayer,_,_], b) :-
     vertical_wins(Board, b).
 
-game_over([Board, CurrentPlayer,_], w) :-
+game_over([Board, CurrentPlayer,_,_], w) :-
     transpose(Board, Transposed),
     vertical_wins(Transposed, w).
 
-game_over([Board, CurrentPlayer,_], draw) :-
-    valid_moves([Board, 'White', _], []),
-    valid_moves([Board, 'Black', _], []),
+game_over([Board, CurrentPlayer,_,Mode], draw) :-
+    valid_moves([Board, 'White', _,Mode], []),
+    valid_moves([Board, 'Black', _,Mode], []),
     \+ vertical_wins(Board, w),
     \+ vertical_wins(Board, b).
 
@@ -235,20 +238,19 @@ write_game_over(GameState) :-
     write('It is a Draw!').
 
 % If no valid moves are available, skip the turn
-choose_move([Board, CurrentPlayer, Players], _, [Board, NextPlayer, Players]) :-
-    valid_moves([Board, CurrentPlayer, Players], []),   % Check if there are no valid moves for the current player
+choose_move([Board, CurrentPlayer, Players,Mode], _, [Board, NextPlayer, Players]) :-
+    valid_moves([Board, CurrentPlayer, Players,Mode], []),   % Check if there are no valid moves for the current player
     write('You have no valid moves. Skipping turn.'), nl, % Inform the player that they have no valid moves
     switch_player(CurrentPlayer, NextPlayer).            % Switch to the next player
 
 % If valid moves exist and the difficulty is 0 (human player), get user input
-choose_move([Board, CurrentPlayer,_], 0, TranslatedMove) :- 
+choose_move([Board, CurrentPlayer,_,Mode], 0, TranslatedMove) :- 
     repeat,                                              % Repeat until a valid move is made
     write('Enter your move as (Row,Col) , Row-Col or [Row, Col]: '),    % Prompt the user to enter a move
     read(Input),                                         % Read the input from the user
     parse_input(Input, Move),                            % Parse the input into [Row,Col] format
     translate_input(Move, TranslatedMove, Board),        % Translate the input coordinates into a valid move
-    write(TranslatedMove),                               % Display the translated move for the user
-    valid_moves([Board, CurrentPlayer,_], ValidMoves),   % Check if the translated move is valid
+    valid_moves([Board, CurrentPlayer,_,Mode], ValidMoves),   % Check if the translated move is valid
     ( member(TranslatedMove, ValidMoves) ->              % If the move is valid, proceed
         !,                                              % Cut to stop further backtracking
         true                                            % Success
@@ -258,8 +260,8 @@ choose_move([Board, CurrentPlayer,_], 0, TranslatedMove) :-
     ).
 
 % If valid moves exist and the difficulty is 1 (random bot), choose randomly
-choose_move([Board, CurrentPlayer,_], 1, Move) :-
-    valid_moves([Board, CurrentPlayer,_], ValidMoves),   % Get the list of valid moves for the bot
+choose_move([Board, CurrentPlayer,_,Mode], 1, Move) :-
+    valid_moves([Board, CurrentPlayer,_,Mode], ValidMoves),   % Get the list of valid moves for the bot
     random_member(Move, ValidMoves).                      % Choose a random valid move for the bot
 
 % hard bot move

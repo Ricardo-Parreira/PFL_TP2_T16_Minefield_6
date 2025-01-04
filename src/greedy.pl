@@ -5,25 +5,25 @@ opponent(b, w).
 opponent(w, b).
 
 % base cases for when the game ends
-value([Board, _, _], b, 10000) :-
+value([Board, _, _,_], b, 10000) :-
     vertical_wins(Board, b), !.
 
-value([Board, _, _], w, 10000) :-
+value([Board, _, _,_], w, 10000) :-
     transpose(Board, Transposed),
     vertical_wins(Transposed, w), !.
 
-value([Board, _, _], Player, -10000) :-
+value([Board, _, _,_], Player, -10000) :-
     opponent(Player, Opponent),
-    value([Board, _, _], Opponent, 10000), !.
+    value([Board, _, _,_], Opponent, 10000), !.
 
 % value for intermediate states
-value([Board, _, _], b, Value) :-
+value([Board, _, _,_], b, Value) :-
     progression_score(Board, b, ProgressionScore),
     %connection_score(Board, b, ConnectionScore),
     potential_score(Board, b, PotentialScore),
     Value is ProgressionScore + PotentialScore. %+ ConnectionScore
 
-value([Board, _, _], w, Value) :-
+value([Board, _, _,_], w, Value) :-
     transpose(Board, Transposed),
     progression_score(Transposed, w, ProgressionScore),
     %connection_score(Transposed, w, ConnectionScore),
@@ -35,9 +35,9 @@ value([Board, _, _], w, Value) :-
 best_moves(_, [], _, Moves, Moves).
 
 %the value of the new play is the same as the max score so we add the move to the list
-best_moves([Board, CurrentPlayer, _], [Move|Rest], MaxValue, Temp, Moves) :-
+best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :-
     color(CurrentPlayer, Colour),
-    move([Board, CurrentPlayer, _], Move, NewGameState),
+    move([Board, CurrentPlayer, _,Mode], Move, NewGameState),
     value(NewGameState, Colour, Value),
     /*write('Value: '), write(Value),
     write('Current Move: '), write(Move), nl,
@@ -45,23 +45,23 @@ best_moves([Board, CurrentPlayer, _], [Move|Rest], MaxValue, Temp, Moves) :-
     write('Temporary Best Moves: '), write(Temp), nl,
     write('loop'), nl,*/
     Value =:= MaxValue,
-    best_moves([Board, CurrentPlayer, _], Rest, MaxValue, [Move | Temp], Moves).
+    best_moves([Board, CurrentPlayer, _,Mode], Rest, MaxValue, [Move | Temp], Moves).
 
 %the value of the new play is greater than the max score so it is now the best move
-best_moves([Board, CurrentPlayer, _], [Move|Rest], MaxValue, Temp, Moves) :-
+best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :-
     color(CurrentPlayer, Colour),
-    move([Board, CurrentPlayer, _], Move, NewGameState),
+    move([Board, CurrentPlayer, _,Mode], Move, NewGameState),
     value(NewGameState, Colour, Value),
     Value > MaxValue,
-    best_moves([Board, CurrentPlayer, _], Rest, Value, [Move], Moves).
+    best_moves([Board, CurrentPlayer, _,Mode], Rest, Value, [Move], Moves).
 
 %the value of the new play is less than the max score so we skip this one
-best_moves([Board, CurrentPlayer, _], [Move|Rest], MaxValue, Temp, Moves) :-
+best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :-
     color(CurrentPlayer, Colour),
-    move([Board, CurrentPlayer, _], Move, NewGameState),
+    move([Board, CurrentPlayer, _,Mode], Move, NewGameState),
     value(NewGameState, Colour, Value),
     Value < MaxValue,
-    best_moves([Board, CurrentPlayer, _], Rest, MaxValue, Temp, Moves).
+    best_moves([Board, CurrentPlayer, _,Mode], Rest, MaxValue, Temp, Moves).
 
 
 /* calculate the progression score based on how the pieces occupy the goal edges*/

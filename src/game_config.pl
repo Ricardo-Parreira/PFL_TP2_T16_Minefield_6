@@ -17,14 +17,28 @@ valid_game_type(Type) :-
 
 configure_game(Type, Config) :-
     get_board_size(BoardSize),
+    get_mode(Mode),
     get_difficulty(Type, Difficulty),
-    Config = [Type, BoardSize, Difficulty].
+    Config = [Type, BoardSize, Difficulty,Mode].
 
 get_board_size(BoardSize) :-
     write('Enter board size (10, 13 or 16): '), nl,
     repeat,
     read_number(BoardSize),
     valid_board_size(BoardSize), !. 
+
+get_mode(Mode) :-
+    write('Enter a mode (1: Beginner, 2: Normal): '), nl,
+    repeat,
+    read_number(Mode),
+    valid_mode(Mode), !. 
+
+valid_mode(Mode) :-
+    member(Mode, [1,2]).
+
+valid_mode(_) :-
+    write('Invalid mode, please try again.'), nl,
+    fail. 
 
 valid_board_size(BoardSize) :-
     member(BoardSize, [10, 13, 16]).
@@ -40,7 +54,7 @@ get_difficulty(Type, none) :-
     \+ requires_difficulty(Type).
 
 ask_difficulty(Difficulty) :-
-    write('Enter difficulty level (1: Random, 2: Hard): '), nl,
+    write('Enter a bot difficulty level (1: Random, 2: Hard): '), nl,
     repeat,
     read_number(Difficulty),
     valid_difficulty(Difficulty), !. 
@@ -56,10 +70,10 @@ requires_difficulty(Type) :-
 
 
 % Set up the initial game state
-initial_state([Type, BoardSize, Difficulty], GameState) :-
+initial_state([Type, BoardSize, Difficulty, Mode], GameState) :-
     create_board(empty, BoardSize, Board),   % Create an initial board with the given size and empty configuration
     players(Type, Difficulty, Players),     % Set up the players based on the game type and difficulty level(for bots)
-    GameState = [Board, 'Black', Players].  % Initialize the game state with the board, starting player ('Black'), and players list
+    GameState = [Board, 'Black', Players, Mode].  % Initialize the game state with the board, starting player ('Black'), and players list
 
 % Configure players based on the game type
 players(1, _, [['Black', 0], ['White', 0]]) :- !. 
