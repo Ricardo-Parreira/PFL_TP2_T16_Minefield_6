@@ -206,38 +206,33 @@ move([Board, CurrentPlayer, Players], [Row, Col], [NewBoard, NextPlayer, Players
     set_cell(Board, Row, Col, Value, NewBoard),                  % Update the board with the players move
     switch_player(CurrentPlayer, NextPlayer).                    % Switch to the next player
 
+game_over([Board, CurrentPlayer,_], b) :-
+    vertical_wins(Board, b).
 
-
-check_game_over([Board, CurrentPlayer,_]) :-
-    valid_moves([Board, 'White'], []),
-    valid_moves([Board, 'Black'], []),
-    vertical_wins(Board, b),
-    write('GAME OVER'), nl,
-    write('Black won!').
-
-check_game_over([Board, CurrentPlayer,_]) :-
-    valid_moves([Board, 'White'], []),
-    valid_moves([Board, 'Black'], []),
-    vertical_wins(Board, w),
-    write('GAME OVER'), nl,
-    write('White won!').
-
-check_game_over([Board, CurrentPlayer,_]) :-
-    valid_moves([Board, 'White'], []),
-    valid_moves([Board, 'Black'], []),
-    write('GAME OVER'), 
-    write('It is a draw!').
-
-check_game_over([Board, CurrentPlayer,_]) :-
-    vertical_wins(Board, b),
-    write('GAME OVER'), nl,
-    write('Black won!').
-
-check_game_over([Board, CurrentPlayer,_]) :-
+game_over([Board, CurrentPlayer,_], w) :-
     transpose(Board, Transposed),
-    vertical_wins(Transposed, w),
+    vertical_wins(Transposed, w).
+
+game_over([Board, CurrentPlayer,_], draw) :-
+    valid_moves([Board, 'White', _], []),
+    valid_moves([Board, 'Black', _], []),
+    \+ vertical_wins(Board, w),
+    \+ vertical_wins(Board, b).
+
+write_game_over(GameState) :-
+    game_over(GameState, b),
+    write('GAME OVER'), nl,
+    write('Black won!').
+
+write_game_over(GameState) :-
+    game_over(GameState, w),
     write('GAME OVER'), nl,
     write('White won!').
+
+write_game_over(GameState) :-
+    game_over(GameState, draw),
+    write('GAME OVER'), nl,
+    write('It is a Draw!').
 
 % If no valid moves are available, skip the turn
 choose_move([Board, CurrentPlayer, Players], _, [Board, NextPlayer, Players]) :-
@@ -276,7 +271,7 @@ choose_move(GameState, 2, Move) :-
 
 game_cycle(GameState) :-
     display_game(GameState), 
-    check_game_over(GameState).
+    write_game_over(GameState).
 
 %game not over may proceed
 game_cycle(GameState) :- 
