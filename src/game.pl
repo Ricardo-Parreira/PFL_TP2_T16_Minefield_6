@@ -267,6 +267,13 @@ choose_move([Board, CurrentPlayer,_], 1, Move) :-
     valid_moves([Board, CurrentPlayer,_], ValidMoves),   % Get the list of valid moves for the bot
     random_member(Move, ValidMoves).                      % Choose a random valid move for the bot
 
+% hard bot move
+choose_move(GameState, 2, Move) :-
+    write('Computer thinking...'),
+    valid_moves(GameState, ValidMoves),
+    best_moves(GameState, ValidMoves, 0, [], BestMoves),
+    random_member(Move, BestMoves). %choose randomly from the best moves to make it less predictable
+
 game_cycle(GameState) :-
     display_game(GameState), 
     check_game_over(GameState).
