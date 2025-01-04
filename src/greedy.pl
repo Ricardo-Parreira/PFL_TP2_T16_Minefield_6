@@ -19,44 +19,50 @@ value([Board, _, _], Player, -10000) :-
 % value for intermediate states
 value([Board, _, _], b, Value) :-
     progression_score(Board, b, ProgressionScore),
-    %connection_score(Board, b, ConnectionScore),
+    connection_score(Board, b, ConnectionScore),
     potential_score(Board, b, PotentialScore),
-    Value is ProgressionScore + PotentialScore.
+    Value is ProgressionScore + ConnectionScore + PotentialScore.
 
 value([Board, _, _], w, Value) :-
     transpose(Board, Transposed),
     progression_score(Transposed, w, ProgressionScore),
     connection_score(Transposed, w, ConnectionScore),
     potential_score(Transposed, w, PotentialScore),
-    Value is ProgressionScore + PotentialScore + ConnectionScore.
+    Value is ProgressionScore + ConnectionScore + PotentialScore.
 
 /*get the best move acoording to value */
 %base case no more moves to explore
-best_moves(_, [], _, Moves, Moves).
-
-%the value of the new play is the same as the max score so we add the move to the list
-best_moves([Board, CurrentPlayer, _], [Move|Rest], MaxValue, Temp, Moves) :-
-    color(CurrentPlayer, Colour),
-    move([Board, CurrentPlayer, _], Move, NewGameState),
-    value(NewGameState, Colour, Value),
-    Value =:= MaxValue,
-    best_moves([Board, CurrentPlayer, _], Rest, MaxValue, [Move | Temp], Moves).
+best_moves(_, [], _, Moves, Moves):- write('Base case reached with Moves: '), write(Moves), !.
 
 %the value of the new play is greater than the max score so it is now the best move
 best_moves([Board, CurrentPlayer, _], [Move|Rest], MaxValue, Temp, Moves) :-
     color(CurrentPlayer, Colour),
+    write('Move'), write(Move), nl,
     move([Board, CurrentPlayer, _], Move, NewGameState),
+    write(NewGameState), nl,
     value(NewGameState, Colour, Value),
+    write('Value: '), write(Value), nl,
+    write('Current Move: '), write(Move), nl,
+    write('Max Value: '), write(MaxValue), nl,
+    write('Temporary Best Moves: '), write(Temp), nl,
     Value > MaxValue,
     best_moves([Board, CurrentPlayer, _], Rest, Value, [Move], Moves).
 
 %the value of the new play is less than the max score so we skip this one
 best_moves([Board, CurrentPlayer, _], [Move|Rest], MaxValue, Temp, Moves) :-
+    write('NEM ENTRO AQUI'),
     color(CurrentPlayer, Colour),
     move([Board, CurrentPlayer, _], Move, NewGameState),
     value(NewGameState, Colour, Value),
     Value < MaxValue,
     best_moves([Board, CurrentPlayer, _], Rest, MaxValue, Temp, Moves).
+
+%the value of the new play is the same as the max score so we add the move to the list
+best_moves([Board, CurrentPlayer, _], [Move | Rest], MaxValue, Temp, Moves) :-
+    color(CurrentPlayer, Colour),
+    move([Board, CurrentPlayer, _], Move, NewGameState),
+    value(NewGameState, Colour, Value),
+    best_moves([Board, CurrentPlayer, _], Rest, MaxValue, [Move | Temp], Moves).
 
 
 /* calculate the progression score based on how the pieces occupy the goal edges*/
@@ -101,6 +107,8 @@ connection_score_calc(_, _, _, [], _, []). % no more pieces to explore
 connection_score_calc(Board, Colour, Size, [Row-Col | Rest], Visited, [Score | Scores]) :-
     \+ member(Row-Col, Visited),
     dfs_score(Board, Row-Col, Row-Col, Size, [], VisitedAfterDFS, Colour, 0.0, ScoreRaw),
+    write('Row-Col: '), write(Row-Col), nl,
+    write('ScoreRaw: '), write(ScoreRaw), nl,
     abs(ScoreRaw, Score),
     append(Visited, VisitedAfterDFS, UpdatedVisited),
     connection_score_calc(Board, Colour, Size, Rest, UpdatedVisited, Scores).
@@ -117,10 +125,10 @@ dfs_score(Board, OldRow-OldCol, Row-Col, Size, Visited, SuperUpdatedVisited, Col
     neighbor_coords(Row, Col, Size, Neighbors),            % Get orthogonal neighbors
     score_calculator(OldRow, Row, CurrentScore, NewScore),
     UpdatedVisited = [Row - Col | Visited], %new Visited List
-    explore_neighbors_score(Board, Neighbors, Size, UpdatedVisited, SuperUpdatedVisited, Colour, Row-Col, NewScore, FinalScore).
+    explore_neighbors_score(Board, Neighbors, Size, UpdatedVisited, SuperUpdatedVisited, Colour, Row-Col, NewScore, FinalScore), !.
 
 % Base case: No more neighbors to explore.
-explore_neighbors_score(_, [], _, Visited, Visited, _, _, AccumulatedScore, AccumulatedScore). 
+explore_neighbors_score(_, [], _, Visited, Visited, _, _, AccumulatedScore, AccumulatedScore):- !. 
 explore_neighbors_score(Board, [NextRow-NextCol | Rest], Size, Visited, SuperUpdatedVisited, Colour, Row-Col, CurrentScore, FinalScore) :-
     \+ member(NextRow-NextCol, Visited),
     nth1(NextRow, Board, RowList),
@@ -143,7 +151,6 @@ explore_neighbors_score(Board, [NextRow-NextCol | Rest], Size, Visited, SuperUpd
 % add 1 when moving downwards
 score_calculator(OldRow, NextRow, OldScore, NewScore) :-
     RowDiff is NextRow - OldRow,
-    RowDiff =:= 1,
     NewScore is OldScore + 100.
 
 % add 1 when moving upwards

@@ -166,7 +166,7 @@ move([Board, CurrentPlayer, Players], _, [Board, NextPlayer, Players]) :-
     switch_player(CurrentPlayer, NextPlayer).
 
 move([Board, CurrentPlayer, Players], [Row, Col], [NewBoard, NextPlayer, Players]) :-
-    valid_moves([Board, CurrentPlayer, Players], ValidMoves),    
+    valid_moves([Board, CurrentPlayer, Players], ValidMoves),  
     member([Row, Col], ValidMoves),  
     color(CurrentPlayer, Value),
     set_cell(Board, Row, Col, Value, NewBoard),
@@ -228,7 +228,9 @@ choose_move([Board, CurrentPlayer,_], 1, Move) :-
 % hard bot move
 choose_move(GameState, 2, Move) :-
     valid_moves(GameState, ValidMoves),
-    best_moves(GameState, ValidMoves, 0, [], BestMoves),
+    write('o problema esta no best moves'), nl,
+    best_moves(GameState, ValidMoves, 0.0, [], BestMoves),
+    write('nem está'),
     random_member(Move, BestMoves). %choose randomly from the best moves to make it less predictable
 
 game_cycle(GameState) :-
