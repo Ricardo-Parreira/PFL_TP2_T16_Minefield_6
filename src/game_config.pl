@@ -54,7 +54,7 @@ get_difficulty(Type, none) :-
     \+ requires_difficulty(Type).
 
 ask_difficulty(Difficulty) :-
-    write('Enter a bot difficulty level (1: Random, 2: Hard): '), nl,
+    write('Enter a bot difficulty level (1: Random, 2: Greedy): '), nl,
     repeat,
     read_number(Difficulty),
     valid_difficulty(Difficulty), !. 
