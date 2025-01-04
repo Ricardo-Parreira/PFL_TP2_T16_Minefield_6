@@ -227,6 +227,7 @@ choose_move([Board, CurrentPlayer,_], 1, Move) :-
 
 % hard bot move
 choose_move(GameState, 2, Move) :-
+    write('Computer thinking...'),
     valid_moves(GameState, ValidMoves),
     best_moves(GameState, ValidMoves, 0, [], BestMoves),
     random_member(Move, BestMoves). %choose randomly from the best moves to make it less predictable

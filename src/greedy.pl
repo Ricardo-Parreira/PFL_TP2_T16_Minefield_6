@@ -21,14 +21,14 @@ value([Board, _, _], b, Value) :-
     progression_score(Board, b, ProgressionScore),
     %connection_score(Board, b, ConnectionScore),
     potential_score(Board, b, PotentialScore),
-    Value is ProgressionScore + PotentialScore.
+    Value is ProgressionScore + PotentialScore. %+ ConnectionScore
 
 value([Board, _, _], w, Value) :-
     transpose(Board, Transposed),
     progression_score(Transposed, w, ProgressionScore),
-    connection_score(Transposed, w, ConnectionScore),
+    %connection_score(Transposed, w, ConnectionScore),
     potential_score(Transposed, w, PotentialScore),
-    Value is ProgressionScore + PotentialScore + ConnectionScore.
+    Value is ProgressionScore + PotentialScore. %+ ConnectionScore
 
 /*get the best move acoording to value */
 %base case no more moves to explore
@@ -39,6 +39,11 @@ best_moves([Board, CurrentPlayer, _], [Move|Rest], MaxValue, Temp, Moves) :-
     color(CurrentPlayer, Colour),
     move([Board, CurrentPlayer, _], Move, NewGameState),
     value(NewGameState, Colour, Value),
+    /*write('Value: '), write(Value),
+    write('Current Move: '), write(Move), nl,
+    write('Max Value: '), write(MaxValue), nl,
+    write('Temporary Best Moves: '), write(Temp), nl,
+    write('loop'), nl,*/
     Value =:= MaxValue,
     best_moves([Board, CurrentPlayer, _], Rest, MaxValue, [Move | Temp], Moves).
 
