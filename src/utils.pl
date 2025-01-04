@@ -156,9 +156,16 @@ parse_input([Row, Col], [Row, Col]) :-
     integer(Row), integer(Col), !.  
 
 parse_input(_, _) :- 
-    write('Invalid input format. Use (Row,Col) or Row-Col or [Row, Col].'), nl, 
+    write('Invalid input format. Use (Row,Col) , Row-Col or [Row, Col].'), nl, 
     fail.  
-
+translate_input([Row, Col], [TranslatedRow, Col], Board) :-
+    % Get the number of rows and columns in the board.
+    length(Board, NumRows),
+    nth0(0, Board, RowList),  % Get the first row to determine the number of columns
+    length(RowList, NumCols),
+    
+    % The row index is reversed (bottom to top), so the translated row is NumRows - Row
+    TranslatedRow is NumRows + 1  - Row.
 
 %takes an Ascii value and passes it to the number
 to_number(Ascii, Number) :- Number is Ascii - 48. 
