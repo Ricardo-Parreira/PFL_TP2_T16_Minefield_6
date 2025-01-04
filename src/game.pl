@@ -209,33 +209,18 @@ move([Board, CurrentPlayer, Players,Mode], [Row, Col], [NewBoard, NextPlayer, Pl
     set_cell(Board, Row, Col, Value, NewBoard),                  % Update the board with the players move
     switch_player(CurrentPlayer, NextPlayer).                    % Switch to the next player
 
-game_over([Board, CurrentPlayer,_,_], b) :-
-    vertical_wins(Board, b).
+game_over([Board, CurrentPlayer,_,_], 'GAME OVER! Black Won!') :-
+    vertical_wins(Board, b), !.
 
-game_over([Board, CurrentPlayer,_,_], w) :-
+game_over([Board, CurrentPlayer,_,_], 'GAME OVER! White Won!') :-
     transpose(Board, Transposed),
-    vertical_wins(Transposed, w).
+    vertical_wins(Transposed, w), !.
 
-game_over([Board, CurrentPlayer,_,Mode], draw) :-
-    valid_moves([Board, 'White', _,Mode], []),
-    valid_moves([Board, 'Black', _,Mode], []),
+game_over([Board, _,Players,Mode], 'GAME OVER! It is a draw!') :-
+    valid_moves([Board, 'White', Players,Mode], []),
+    valid_moves([Board, 'Black', Players,Mode], []),
     \+ vertical_wins(Board, w),
-    \+ vertical_wins(Board, b).
-
-write_game_over(GameState) :-
-    game_over(GameState, b),
-    write('GAME OVER'), nl,
-    write('Black won!').
-
-write_game_over(GameState) :-
-    game_over(GameState, w),
-    write('GAME OVER'), nl,
-    write('White won!').
-
-write_game_over(GameState) :-
-    game_over(GameState, draw),
-    write('GAME OVER'), nl,
-    write('It is a Draw!').
+    \+ vertical_wins(Board, b), !.
 
 % If no valid moves are available, skip the turn
 choose_move([Board, CurrentPlayer, Players,Mode], _, [Board, NextPlayer, Players]) :-
@@ -273,7 +258,8 @@ choose_move(GameState, 2, Move) :-
 
 game_cycle(GameState) :-
     display_game(GameState), 
-    write_game_over(GameState).
+    game_over(GameState, Winner),!,
+    write(Winner).
 
 %game not over may proceed
 game_cycle(GameState) :- 
