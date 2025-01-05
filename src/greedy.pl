@@ -93,15 +93,21 @@ progression_score_calc(Board, Colour, Score):-
 
 /* Calculate the score based on the potential a piece has to create connections */
 potential_score([Board, _, _,Mode], Colour, TotalScore) :-
+    all_pieces(Board, Colour, Pieces),
+    potential_score_calc([Board, _, _,Mode], Pieces, Colour, 0, TotalScore).
+
+%no more pieces to explore
+potential_score_calc(_, [], _, Score, Score).
+
+% count all the free spaces around our pieces 
+potential_score_calc([Board, _, _, Mode], [Row-Col | Rest], Colour, Score, TotalScore) :-
     length(Board, Size), 
-    findall(Score, (
-        nth1(Row, Board, RowList),      % For each row
-        nth1(Col, RowList, Colour),          % For each correct stone in the row
-        neighbor_coords(Row, Col, Size, Neighbors),
-        get_surrounding_moves([Board, _, _,Mode], Colour, Neighbors, [], Surrounding),
-        length(Surrounding, Score) %gets the number of free spaces surrounding the piece
-    ), AllScores),
-    list_sum(AllScores, TotalScore).
+    neighbor_coords(Row, Col, Size, Neighbors),
+    get_surrounding_moves([Board, _, _,Mode], Colour, Neighbors, [], Surrounding),
+    length(Surrounding, SurLength),
+    NewScore is SurLength + Score,
+    potential_score_calc([Board, _, _, Mode], Rest, Colour, NewScore, TotalScore).
+
 
 /* calculate the score based on the connection it is making and if it is moving in the right direction*/
 connection_score([Board, _, _, _], Colour, TotalScore) :-
