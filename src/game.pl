@@ -190,7 +190,7 @@ switch_pattern([Player, empty, empty, Opponent, Opponent, empty, empty,  Player]
 switch_pattern([Opponent, empty, empty, Player, Player, empty, empty, Opponent], Player, Opponent).
 
 % checks if a a move is valid
-is_valid_move(Board, Row, Col, Player ,1) :-
+is_valid_move(Board, Row, Col, _ ,1) :-
     within_bounds(Board, Row, Col),
     cell_empty(Board, Row, Col).
 
@@ -204,7 +204,7 @@ valid_moves([Board, CurrentPlayer, _ , Mode | _], ValidMoves) :-
     findall([Row, Col], is_valid_move(Board, Row, Col, CurrentPlayer , Mode), ValidMoves).  
     % Generate a list of all valid moves for the current player by finding rows and columns where a move is valid on the current board.
 
-move([Board, CurrentPlayer, Players,Mode],skipped, [NewBoard, NextPlayer, Players,Mode]) :-
+move([Board, CurrentPlayer, Players,Mode],skipped, [Board, NextPlayer, Players,Mode]) :-
     switch_player(CurrentPlayer, NextPlayer).                    % Switch to the next player
 
 % takes a GameState and a move and returns a new game state with the move applied
@@ -216,10 +216,10 @@ move([Board, CurrentPlayer, Players,Mode], [Row, Col], [NewBoard, NextPlayer, Pl
     switch_player(CurrentPlayer, NextPlayer).                    % Switch to the next player
 
 % checks if the game is over by running through all the paths that start on one of the goal edges and see if it reaches the other
-game_over([Board, CurrentPlayer,_,_], 'GAME OVER! Black Won!') :-
+game_over([Board, _,_,_], 'GAME OVER! Black Won!') :-
     vertical_wins(Board, b), !.
 
-game_over([Board, CurrentPlayer,_,_], 'GAME OVER! White Won!') :-
+game_over([Board, _,_,_], 'GAME OVER! White Won!') :-
     transpose(Board, Transposed),
     vertical_wins(Transposed, w), !.
 
@@ -231,8 +231,7 @@ game_over([Board, _,Players,Mode], 'GAME OVER! It is a draw!') :-
 % If no valid moves are available, skip the turn
 choose_move([Board, CurrentPlayer, Players, Mode], _, skipped) :-
     valid_moves([Board, CurrentPlayer, Players,Mode], []),   % Check if there are no valid moves for the current player
-    write('You have no valid moves. Skipping turn.'), nl, % Inform the player that they have no valid moves
-    switch_player(CurrentPlayer, NextPlayer).            % Switch to the next player
+    write('You have no valid moves. Skipping turn.'), nl. % Inform the player that they have no valid moves
 
 % If valid moves exist and the difficulty is 0 (human player), get user input
 choose_move([Board, CurrentPlayer,_,Mode], 0, TranslatedMove) :- 

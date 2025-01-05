@@ -43,7 +43,7 @@ value([Board, _, _,Mode], w, Value) :-
 best_moves(_, [], _, Moves, Moves).
 
 %extreme case to block the enemies win
-best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :-
+best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, _, Moves) :-
     color(CurrentPlayer, Colour),
     opponent(Colour, Opponent),
     color(CurrentOpponent, Opponent),
@@ -53,7 +53,7 @@ best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :
     best_moves([Board, CurrentPlayer, _,Mode], Rest, 9000, [Move], Moves).
 
 %the value of the new play is greater than the max score so it is now the best move
-best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :-
+best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, _, Moves) :-
     color(CurrentPlayer, Colour),
     opponent(Colour, Opponent),
     move([Board, CurrentPlayer, _,Mode], Move, NewGameState),
