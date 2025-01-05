@@ -4,6 +4,15 @@
 opponent(b, w).
 opponent(w, b).
 
+/* 
+value evaluates how good the current game state is for a certain player, taking in account:
+
+    How big and ambicious all the players connections are
+    The potential for the creation of new connections
+    Its position in the goal edges
+
+And we carefully altered how each one of these was evaluated and tried to reach an optimal balance between them
+*/
 % base cases for when the game ends
 value([Board, _, _,_], b, 10000) :-
     vertical_wins(Board, b), !.

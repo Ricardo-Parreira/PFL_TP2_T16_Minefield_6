@@ -11,6 +11,7 @@ switch_player('White', 'Black').
 get_difficulty_level([_, CurrentPlayer, Players,_], Difficulty) :-
     member([CurrentPlayer, Difficulty], Players).
 
+% Receives the current game state and prints it along with the current player in the terminal
 display_game([Board, Player, _,_]) :- 
     nl,                              % Add an extra newline for visual separation
     write('Current Player: '),       % Display the label for the current player
