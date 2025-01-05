@@ -36,3 +36,15 @@ board_white_win([
     [empty, empty, empty, empty, empty, empty, b, empty, b, empty],
     [w, empty, b, empty, empty, empty, empty, w, empty, b]
 ]).
+board_draw([
+    [w, b, b, w, w, b, w, b, w, w],
+    [b, w, b, b, w, w, b, w, b, b],
+    [b, b, w, w, b, w, b, b, w, w],
+    [w, b, b, w, b, b, w, b, w, b],
+    [b, w, w, b, w, w, b, w, b, b],
+    [w, b, b, w, b, w, b, b, w, w],
+    [b, w, w, b, w, b, w, b, w, b],
+    [w, b, b, w, b, w, b, w, b, w],
+    [b, w, w, b, w, b, w, b, w, b],
+    [w, b, b, w, w, b, w, empty, b, w]
+]).
