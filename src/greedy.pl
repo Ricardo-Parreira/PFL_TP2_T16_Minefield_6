@@ -12,22 +12,22 @@ value([Board, _, _,_], w, 10000) :-
     transpose(Board, Transposed),
     vertical_wins(Transposed, w), !.
 
-value([Board, _, _,_], Player, -10000) :-
+value(GameState, Player, -10000) :-
     opponent(Player, Opponent),
-    value([Board, _, _,_], Opponent, 10000), !.
+    value(GameState, Opponent, 10000), !.
 
 % value for intermediate states
-value([Board, _, _,_], b, Value) :-
-    progression_score(Board, b, ProgressionScore),
-    %connection_score(Board, b, ConnectionScore),
-    potential_score(Board, b, PotentialScore),
+value([Board, _, _,Mode], b, Value) :-
+    progression_score([Board, _, _,_], b, ProgressionScore),
+    %connection_score([Board, _, _,_], b, ConnectionScore),
+    potential_score([Board, _, _, Mode], b, PotentialScore),
     Value is ProgressionScore + PotentialScore. %+ ConnectionScore
 
-value([Board, _, _,_], w, Value) :-
+value([Board, _, _,Mode], w, Value) :-
     transpose(Board, Transposed),
-    progression_score(Transposed, w, ProgressionScore),
-    %connection_score(Transposed, w, ConnectionScore),
-    potential_score(Transposed, w, PotentialScore),
+    progression_score([Transposed, _, _,_], w, ProgressionScore),
+    %connection_score([Transposed, _, _,_], w, ConnectionScore),
+    potential_score([Transposed, _, _,Mode], w, PotentialScore),
     Value is ProgressionScore + PotentialScore. %+ ConnectionScore
 
 /*get the best move acoording to value */
@@ -47,6 +47,16 @@ best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :
     Value =:= MaxValue,
     best_moves([Board, CurrentPlayer, _,Mode], Rest, MaxValue, [Move | Temp], Moves).
 
+%extreme case to block the enemies win
+best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :-
+    color(CurrentPlayer, Colour),
+    opponent(Colour, Opponent),
+    color(CurrentOpponent, Opponent),
+    move([Board, CurrentOpponent, _,Mode], Move, NewGameState),
+    value(NewGameState, Opponent, 10000),
+    9000 > MaxValue,    % slightly worst than winning so it still chooses the win move when possible
+    best_moves([Board, CurrentPlayer, _,Mode], Rest, 9000, [Move], Moves).
+
 %the value of the new play is greater than the max score so it is now the best move
 best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :-
     color(CurrentPlayer, Colour),
@@ -65,9 +75,9 @@ best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :
 
 
 /* calculate the progression score based on how the pieces occupy the goal edges*/
-progression_score(Board, b, Score):-
+progression_score([Board, _, _,_], b, Score):-
     progression_score_calc(Board, b, Score).
-progression_score(Board, w, Score) :-
+progression_score([Board, _, _,_], w, Score) :-
     transpose(Board, Transposed),
     progression_score_calc(Transposed, w, Score).
 
@@ -84,19 +94,19 @@ progression_score_calc(Board, Colour, Score):-
 
 
 /* Calculate the score based on the potential a piece has to create connections */
-potential_score(Board, Colour, TotalScore) :-
+potential_score([Board, _, _,Mode], Colour, TotalScore) :-
     length(Board, Size), 
     findall(Score, (
         nth1(Row, Board, RowList),      % For each row
         nth1(Col, RowList, Colour),          % For each correct stone in the row
         neighbor_coords(Row, Col, Size, Neighbors),
-        get_surrounding_moves(Board, Colour, Neighbors, [], Surrounding),
+        get_surrounding_moves([Board, _, _,Mode], Colour, Neighbors, [], Surrounding),
         length(Surrounding, Score) %gets the number of free spaces surrounding the piece
     ), AllScores),
     list_sum(AllScores, TotalScore).
 
 /* calculate the score based on the different paths it has, how big they are and if they move optimally in the right direction*/
-connection_score(Board, Colour, TotalScore) :-
+connection_score([Board, _, _,_], Colour, TotalScore) :-
     length(Board, Size),
     all_pieces(Board, Colour, AllPieces),
     connection_score_calc(Board, Colour, Size, AllPieces, [], AllScores),
@@ -175,14 +185,14 @@ is_blocked_completely(Board, Row-Col, Size, Colour) :-
 % get valid moves from a list of neighboring coordinates
 get_surrounding_moves(_, _, [], Surrounding, Surrounding). % no more neighbors
 % add if valid
-get_surrounding_moves(Board, Colour, [Row-Col|Rest], Sur, Surrounding) :-
-    is_valid_move(Board, Row, Col, Colour),
+get_surrounding_moves([Board, _, _,Mode | _], Colour, [Row-Col|Rest], Sur, Surrounding) :-
+    is_valid_move(Board, Row, Col, Colour, Mode),
     Sur1 = [Row-Col|Sur],
-    get_surrounding_moves(Board, Colour, Rest, Sur1, Surrounding).
+    get_surrounding_moves([Board, _, _,Mode | _], Colour, Rest, Sur1, Surrounding).
 %skip if not valid
-get_surrounding_moves(Board, Colour, [Row-Col|Rest], Sur, Surrounding) :-
-    \+ is_valid_move(Board, Row, Col, Colour),
-    get_surrounding_moves(Board, Colour, Rest, Sur, Surrounding).
+get_surrounding_moves([Board, _, _,Mode | _], Colour, [Row-Col|Rest], Sur, Surrounding) :-
+    \+ is_valid_move(Board, Row, Col, Colour, Mode),
+    get_surrounding_moves([Board, _, _,Mode | _], Colour, Rest, Sur, Surrounding).
 
 % to check if a list is a subset of another list
 list_subset([], _). % Base case: empty list is always a subset
