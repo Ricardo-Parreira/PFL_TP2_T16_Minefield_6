@@ -142,8 +142,6 @@ potential_score_calc([Board, _, _, Mode], [Row-Col | Rest], Colour, Score, Total
     SurLength > 2,
     NewScore is SurLength + Score,
     potential_score_calc([Board, _, _, Mode], Rest, Colour, NewScore, TotalScore).
-    NewScore is SurLength + Score,
-    potential_score_calc([Board, _, _, Mode], Rest, Colour, NewScore, TotalScore).
 
 
 
@@ -163,7 +161,7 @@ connection_score_calc(Board, Colour, Size, [Row-Col | Rest], Visited, Score, Fin
     connection_score_calc(Board, Colour, Size, Rest, [Row-Col | Visited], S1, FinalScore).
 connection_score_calc(Board, Colour, Size, [Row-Col | Rest], Visited, Score, FinalScore) :-
     member(Row-Col, Visited),
-    connection_score_calc(Board, Colour, Size, Rest, UpdatedVisited, Score, FinalScore).
+    connection_score_calc(Board, Colour, Size, Rest, Visited, Score, FinalScore).
 
 %this will apply 100 per connection towards the goal and 20 per sidetracking
 neighbors_calc(_, [], Score, Score). %base case no more stones
