@@ -51,7 +51,8 @@ best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :
     value(NewGameState, Colour, Value),
     potential_score([Board, _, _, Mode], Opponent, OpponentScore1),   %get opponents potential_score before we make our move
     potential_score(NewGameState, Opponent, OpponentScore2),        %get opponents potential_score after we make our move
-    BlockValue is OpponentScore1 - OpponentScore2,                  % good if we were able to block opponents pieces
+    BlockValue2 is OpponentScore1 - OpponentScore2,                  % good if we were able to block opponents pieces
+    BlockValue is BlockValue2 * 2,
     TotalValue is Value + BlockValue,
     TotalValue > MaxValue,
     best_moves([Board, CurrentPlayer, _,Mode], Rest, TotalValue, [Move], Moves).
@@ -59,17 +60,29 @@ best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :
 %the value of the new play is less than the max score so we skip this one
 best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :-
     color(CurrentPlayer, Colour),
+    opponent(Colour, Opponent),
     move([Board, CurrentPlayer, _,Mode], Move, NewGameState),
     value(NewGameState, Colour, Value),
-    Value < MaxValue,
+    potential_score([Board, _, _, Mode], Opponent, OpponentScore1),   %get opponents potential_score before we make our move
+    potential_score(NewGameState, Opponent, OpponentScore2),        %get opponents potential_score after we make our move
+    BlockValue2 is OpponentScore1 - OpponentScore2,                  % good if we were able to block opponents pieces
+    BlockValue is BlockValue2 * 2,
+    TotalValue is Value + BlockValue,
+    TotalValue < MaxValue,
     best_moves([Board, CurrentPlayer, _,Mode], Rest, MaxValue, Temp, Moves).
 
 %the value of the new play is the same as the max score so we add the move to the list
 best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :-
     color(CurrentPlayer, Colour),
+    opponent(Colour, Opponent),
     move([Board, CurrentPlayer, _,Mode], Move, NewGameState),
     value(NewGameState, Colour, Value),
-    Value =:= MaxValue,
+    potential_score([Board, _, _, Mode], Opponent, OpponentScore1),   %get opponents potential_score before we make our move
+    potential_score(NewGameState, Opponent, OpponentScore2),        %get opponents potential_score after we make our move
+    BlockValue2 is OpponentScore1 - OpponentScore2,                  % good if we were able to block opponents pieces
+    BlockValue is BlockValue2 * 2,
+    TotalValue is Value + BlockValue,
+    TotalValue =:= MaxValue,
     best_moves([Board, CurrentPlayer, _,Mode], Rest, MaxValue, [Move | Temp], Moves).
 
 /* calculate the progression score based on how the pieces occupy the goal edges*/
@@ -99,14 +112,30 @@ potential_score([Board, _, _,Mode], Colour, TotalScore) :-
 %no more pieces to explore
 potential_score_calc(_, [], _, Score, Score).
 
-% count all the free spaces around our pieces 
+
+%these are part of an effort to balance the point system in value
+% surrounding less than 3 so it doesnt bring that much value
 potential_score_calc([Board, _, _, Mode], [Row-Col | Rest], Colour, Score, TotalScore) :-
     length(Board, Size), 
     neighbor_coords(Row, Col, Size, Neighbors),
     get_surrounding_moves([Board, _, _,Mode], Colour, Neighbors, [], Surrounding),
     length(Surrounding, SurLength),
+    SurLength < 3,
+    SurLength2 is SurLength / 2,
+    NewScore is SurLength2 + Score,
+    potential_score_calc([Board, _, _, Mode], Rest, Colour, NewScore, TotalScore).
+% surrounding more than 2, add it to the other potential scores
+potential_score_calc([Board, _, _, Mode], [Row-Col | Rest], Colour, Score, TotalScore) :-
+    length(Board, Size), 
+    neighbor_coords(Row, Col, Size, Neighbors),
+    get_surrounding_moves([Board, _, _,Mode], Colour, Neighbors, [], Surrounding),
+    length(Surrounding, SurLength),
+    SurLength > 2,
     NewScore is SurLength + Score,
     potential_score_calc([Board, _, _, Mode], Rest, Colour, NewScore, TotalScore).
+    NewScore is SurLength + Score,
+    potential_score_calc([Board, _, _, Mode], Rest, Colour, NewScore, TotalScore).
+
 
 
 /* calculate the score based on the connection it is making and if it is moving in the right direction*/
@@ -138,7 +167,7 @@ neighbors_calc(Row, [NeiRow-_ | Rest],Score, FinalScore):-
     RowDiff1 is NeiRow - Row,
     abs(RowDiff1, RowDiff),
     RowDiff =:= 1, %goes towards the goal
-    NewScore is Score + 5,
+    NewScore is Score + 3,
     neighbors_calc(Row, Rest, NewScore, FinalScore).
 
 /*
