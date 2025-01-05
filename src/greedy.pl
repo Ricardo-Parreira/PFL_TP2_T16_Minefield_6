@@ -93,15 +93,32 @@ progression_score_calc(Board, Colour, Score):-
 
 /* Calculate the score based on the potential a piece has to create connections */
 potential_score([Board, _, _,Mode], Colour, TotalScore) :-
+    all_pieces(Board, Colour, Pieces),
+    potential_score_calc([Board, _, _,Mode], Pieces, Colour, 0, TotalScore).
+
+%no more pieces to explore
+potential_score_calc(_, [], _, Score, Score).
+
+%these are part of an effort to balance the point system in value
+% surrounding less than 3 so it doesnt bring that much value
+potential_score_calc([Board, _, _, Mode], [Row-Col | Rest], Colour, Score, TotalScore) :-
     length(Board, Size), 
-    findall(Score, (
-        nth1(Row, Board, RowList),      % For each row
-        nth1(Col, RowList, Colour),          % For each correct stone in the row
-        neighbor_coords(Row, Col, Size, Neighbors),
-        get_surrounding_moves([Board, _, _,Mode], Colour, Neighbors, [], Surrounding),
-        length(Surrounding, Score) %gets the number of free spaces surrounding the piece
-    ), AllScores),
-    list_sum(AllScores, TotalScore).
+    neighbor_coords(Row, Col, Size, Neighbors),
+    get_surrounding_moves([Board, _, _,Mode], Colour, Neighbors, [], Surrounding),
+    length(Surrounding, SurLength),
+    SurLength < 3,
+    SurLength2 is SurLength / 2,
+    NewScore is SurLength2 + Score,
+    potential_score_calc([Board, _, _, Mode], Rest, Colour, NewScore, TotalScore).
+% surrounding more than 2, add it to the other potential scores
+potential_score_calc([Board, _, _, Mode], [Row-Col | Rest], Colour, Score, TotalScore) :-
+    length(Board, Size), 
+    neighbor_coords(Row, Col, Size, Neighbors),
+    get_surrounding_moves([Board, _, _,Mode], Colour, Neighbors, [], Surrounding),
+    length(Surrounding, SurLength),
+    SurLength > 2,
+    NewScore is SurLength + Score,
+    potential_score_calc([Board, _, _, Mode], Rest, Colour, NewScore, TotalScore).
 
 /* calculate the score based on the connection it is making and if it is moving in the right direction*/
 connection_score([Board, _, _, _], Colour, TotalScore) :-
@@ -132,7 +149,7 @@ neighbors_calc(Row, [NeiRow-_ | Rest],Score, FinalScore):-
     RowDiff1 is NeiRow - Row,
     abs(RowDiff1, RowDiff),
     RowDiff =:= 1, %goes towards the goal
-    NewScore is Score + 5,
+    NewScore is Score + 2,
     neighbors_calc(Row, Rest, NewScore, FinalScore).
 
 /*
