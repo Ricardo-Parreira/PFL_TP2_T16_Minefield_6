@@ -33,19 +33,6 @@ value([Board, _, _,Mode], w, Value) :-
 %base case no more moves to explore
 best_moves(_, [], _, Moves, Moves).
 
-%the value of the new play is the same as the max score so we add the move to the list
-best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :-
-    color(CurrentPlayer, Colour),
-    move([Board, CurrentPlayer, _,Mode], Move, NewGameState),
-    value(NewGameState, Colour, Value),
-    /*write('Value: '), write(Value),
-    write('Current Move: '), write(Move), nl,
-    write('Max Value: '), write(MaxValue), nl,
-    write('Temporary Best Moves: '), write(Temp), nl,
-    write('loop'), nl,*/
-    Value =:= MaxValue,
-    best_moves([Board, CurrentPlayer, _,Mode], Rest, MaxValue, [Move | Temp], Moves).
-
 %extreme case to block the enemies win
 best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :-
     color(CurrentPlayer, Colour),
@@ -59,10 +46,15 @@ best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :
 %the value of the new play is greater than the max score so it is now the best move
 best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :-
     color(CurrentPlayer, Colour),
+    opponent(Colour, Opponent),
     move([Board, CurrentPlayer, _,Mode], Move, NewGameState),
     value(NewGameState, Colour, Value),
-    Value > MaxValue,
-    best_moves([Board, CurrentPlayer, _,Mode], Rest, Value, [Move], Moves).
+    potential_score([Board, _, _, Mode], Opponent, OpponentScore1),   %get opponents potential_score before we make our move
+    potential_score(NewGameState, Opponent, OpponentScore2),        %get opponents potential_score after we make our move
+    BlockValue is OpponentScore1 - OpponentScore2,                  % good if we were able to block opponents pieces
+    TotalValue is Value + BlockValue,
+    TotalValue > MaxValue,
+    best_moves([Board, CurrentPlayer, _,Mode], Rest, TotalValue, [Move], Moves).
 
 %the value of the new play is less than the max score so we skip this one
 best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :-
@@ -72,6 +64,13 @@ best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :
     Value < MaxValue,
     best_moves([Board, CurrentPlayer, _,Mode], Rest, MaxValue, Temp, Moves).
 
+%the value of the new play is the same as the max score so we add the move to the list
+best_moves([Board, CurrentPlayer, _,Mode], [Move|Rest], MaxValue, Temp, Moves) :-
+    color(CurrentPlayer, Colour),
+    move([Board, CurrentPlayer, _,Mode], Move, NewGameState),
+    value(NewGameState, Colour, Value),
+    Value =:= MaxValue,
+    best_moves([Board, CurrentPlayer, _,Mode], Rest, MaxValue, [Move | Temp], Moves).
 
 /* calculate the progression score based on how the pieces occupy the goal edges*/
 progression_score([Board, _, _,_], b, Score):-
@@ -127,13 +126,13 @@ neighbors_calc(_, [], Score, Score). %base case no more stones
 neighbors_calc(Row, [NeiRow-_ | Rest],Score, FinalScore):-
     RowDiff is NeiRow - Row,
     RowDiff =:= 0, %no change in Row
-    NewScore is Score + 10,
+    NewScore is Score + 1,
     neighbors_calc(Row, Rest, NewScore, FinalScore).
 neighbors_calc(Row, [NeiRow-_ | Rest],Score, FinalScore):-
     RowDiff1 is NeiRow - Row,
     abs(RowDiff1, RowDiff),
     RowDiff =:= 1, %goes towards the goal
-    NewScore is Score + 50,
+    NewScore is Score + 5,
     neighbors_calc(Row, Rest, NewScore, FinalScore).
 
 /*
