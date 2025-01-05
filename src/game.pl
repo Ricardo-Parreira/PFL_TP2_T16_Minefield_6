@@ -218,9 +218,7 @@ game_over([Board, CurrentPlayer,_,_], 'GAME OVER! White Won!') :-
 
 game_over([Board, _,Players,Mode], 'GAME OVER! It is a draw!') :-
     valid_moves([Board, 'White', Players,Mode], []),
-    valid_moves([Board, 'Black', Players,Mode], []),
-    \+ vertical_wins(Board, w),
-    \+ vertical_wins(Board, b), !.
+    valid_moves([Board, 'Black', Players,Mode], []).
 
 % If no valid moves are available, skip the turn
 choose_move([Board, CurrentPlayer, Players,Mode], _, [Board, NextPlayer, Players]) :-

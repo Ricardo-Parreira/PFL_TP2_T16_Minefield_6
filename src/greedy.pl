@@ -127,13 +127,13 @@ neighbors_calc(_, [], Score, Score). %base case no more stones
 neighbors_calc(Row, [NeiRow-_ | Rest],Score, FinalScore):-
     RowDiff is NeiRow - Row,
     RowDiff =:= 0, %no change in Row
-    NewScore is Score + 10,
+    NewScore is Score + 1,
     neighbors_calc(Row, Rest, NewScore, FinalScore).
 neighbors_calc(Row, [NeiRow-_ | Rest],Score, FinalScore):-
     RowDiff1 is NeiRow - Row,
     abs(RowDiff1, RowDiff),
     RowDiff =:= 1, %goes towards the goal
-    NewScore is Score + 50,
+    NewScore is Score + 5,
     neighbors_calc(Row, Rest, NewScore, FinalScore).
 
 /*
