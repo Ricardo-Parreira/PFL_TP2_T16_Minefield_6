@@ -112,6 +112,7 @@ potential_score([Board, _, _,Mode], Colour, TotalScore) :-
 %no more pieces to explore
 potential_score_calc(_, [], _, Score, Score).
 
+
 %these are part of an effort to balance the point system in value
 % surrounding less than 3 so it doesnt bring that much value
 potential_score_calc([Board, _, _, Mode], [Row-Col | Rest], Colour, Score, TotalScore) :-
@@ -132,6 +133,10 @@ potential_score_calc([Board, _, _, Mode], [Row-Col | Rest], Colour, Score, Total
     SurLength > 2,
     NewScore is SurLength + Score,
     potential_score_calc([Board, _, _, Mode], Rest, Colour, NewScore, TotalScore).
+    NewScore is SurLength + Score,
+    potential_score_calc([Board, _, _, Mode], Rest, Colour, NewScore, TotalScore).
+
+
 
 /* calculate the score based on the connection it is making and if it is moving in the right direction*/
 connection_score([Board, _, _, _], Colour, TotalScore) :-

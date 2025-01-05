@@ -188,6 +188,7 @@ switch_pattern([Opponent, empty, Player, Player, empty,  Opponent], Player, Oppo
 switch_pattern([Player, empty, empty, Opponent, Opponent, empty, empty,  Player], Player, Opponent).
 switch_pattern([Opponent, empty, empty, Player, Player, empty, empty, Opponent], Player, Opponent).
 
+% checks if a a move is valid
 is_valid_move(Board, Row, Col, Player ,1) :-
     within_bounds(Board, Row, Col),
     cell_empty(Board, Row, Col).
@@ -205,6 +206,7 @@ valid_moves([Board, CurrentPlayer, _ , Mode | _], ValidMoves) :-
 move([Board, CurrentPlayer, Players,Mode],skipped, [NewBoard, NextPlayer, Players,Mode]) :-
     switch_player(CurrentPlayer, NextPlayer).                    % Switch to the next player
 
+% takes a GameState and a move and returns a new game state with the move applied
 move([Board, CurrentPlayer, Players,Mode], [Row, Col], [NewBoard, NextPlayer, Players,Mode]) :-
     valid_moves([Board, CurrentPlayer, Players,Mode], ValidMoves),     % Get the list of all valid moves for the current player
     member([Row, Col], ValidMoves),                              % Ensure the desired move is in the list of valid moves
@@ -212,6 +214,7 @@ move([Board, CurrentPlayer, Players,Mode], [Row, Col], [NewBoard, NextPlayer, Pl
     set_cell(Board, Row, Col, Value, NewBoard),                  % Update the board with the players move
     switch_player(CurrentPlayer, NextPlayer).                    % Switch to the next player
 
+% checks if the game is over by running through all the paths that start on one of the goal edges and see if it reaches the other
 game_over([Board, CurrentPlayer,_,_], 'GAME OVER! Black Won!') :-
     vertical_wins(Board, b), !.
 
@@ -219,6 +222,7 @@ game_over([Board, CurrentPlayer,_,_], 'GAME OVER! White Won!') :-
     transpose(Board, Transposed),
     vertical_wins(Transposed, w), !.
 
+%if none of the players have any more valid moves left, the game ends in a draw
 game_over([Board, _,Players,Mode], 'GAME OVER! It is a draw!') :-
     valid_moves([Board, 'White', Players,Mode], []),
     valid_moves([Board, 'Black', Players,Mode], []).
@@ -250,16 +254,18 @@ choose_move([Board, CurrentPlayer,_,Mode], 1, Move) :-
     valid_moves([Board, CurrentPlayer,_,Mode], ValidMoves),   % Get the list of valid moves for the bot
     random_member(Move, ValidMoves).                      % Choose a random valid move for the bot
 
-% hard bot move
+% greedy bot greedily chooses next play based on the value of every possible play
+% if multiple moves result in the same value it will choose randomly to be unpredictable
 choose_move(GameState, 2, Move) :-
     write('Computer thinking...'),
     valid_moves(GameState, ValidMoves),
     best_moves(GameState, ValidMoves, 0, [], BestMoves),
     random_member(Move, BestMoves). %choose randomly from the best moves to make it less predictable
 
+% main game loop
 game_cycle(GameState) :-
     display_game(GameState), 
-    game_over(GameState, Winner),!,
+    game_over(GameState, Winner),!,  %if the game is over, end it
     write(Winner).
 
 %game not over may proceed
@@ -271,7 +277,7 @@ game_cycle(GameState) :-
 
 
 
-   
+% main function
 play :-
     draw_menu,                      % Display the menu to the user
     choose_game_type(Type), !,      % Allow the user to choose the game type; cut to avoid backtracking
