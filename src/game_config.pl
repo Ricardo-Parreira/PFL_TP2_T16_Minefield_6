@@ -70,7 +70,7 @@ requires_difficulty(Type) :-
     member(Type, [2, 3, 4]).
 
 
-% Set up the initial game state
+% Receives a desired type, board size, bot difficulty and mode and returns a the initial game state with all of this information setup
 initial_state([Type, BoardSize, Difficulty, Mode], GameState) :-
     create_board(empty, BoardSize, Board),   % Create an initial board with the given size and empty configuration
     players(Type, Difficulty, Players),     % Set up the players based on the game type and difficulty level(for bots)
