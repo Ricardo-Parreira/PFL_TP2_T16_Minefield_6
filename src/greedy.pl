@@ -19,16 +19,15 @@ value(GameState, Player, -10000) :-
 % value for intermediate states
 value([Board, _, _,Mode], b, Value) :-
     progression_score([Board, _, _,_], b, ProgressionScore),
-    %connection_score([Board, _, _,_], b, ConnectionScore),
+    connection_score([Board, _, _,_], b, ConnectionScore),
     potential_score([Board, _, _, Mode], b, PotentialScore),
-    Value is ProgressionScore + PotentialScore. %+ ConnectionScore
-
+    Value is ProgressionScore + ConnectionScore + PotentialScore. 
 value([Board, _, _,Mode], w, Value) :-
     transpose(Board, Transposed),
     progression_score([Transposed, _, _,_], w, ProgressionScore),
-    %connection_score([Transposed, _, _,_], w, ConnectionScore),
+    connection_score([Transposed, _, _,_], w, ConnectionScore),
     potential_score([Transposed, _, _,Mode], w, PotentialScore),
-    Value is ProgressionScore + PotentialScore. %+ ConnectionScore
+    Value is ProgressionScore + ConnectionScore + PotentialScore.
 
 /*get the best move acoording to value */
 %base case no more moves to explore
@@ -105,7 +104,42 @@ potential_score([Board, _, _,Mode], Colour, TotalScore) :-
     ), AllScores),
     list_sum(AllScores, TotalScore).
 
-/* calculate the score based on the different paths it has, how big they are and if they move optimally in the right direction*/
+/* calculate the score based on the connection it is making and if it is moving in the right direction*/
+connection_score([Board, _, _, _], Colour, TotalScore) :-
+    length(Board, Size),
+    all_pieces(Board, Colour, AllPieces),
+    connection_score_calc(Board, Colour, Size, AllPieces, [], 0, TotalScore).
+
+connection_score_calc(_, _, _, [], _, Score, Score). % no more pieces to explore
+connection_score_calc(Board, Colour, Size, [Row-Col | Rest], Visited, Score, FinalScore) :-
+    \+ member(Row-Col, Visited),  %in this case visit is probably redundant but i will keep it for safekeeping
+    neighbor_coords(Row, Col, Size, Neighbors),
+    get_surrounding_stones(Board, Colour, Neighbors, Surrounding),
+    neighbors_calc(Row, Surrounding, 0, NeiScore),
+    S1 is Score + NeiScore,
+    connection_score_calc(Board, Colour, Size, Rest, [Row-Col | Visited], S1, FinalScore).
+connection_score_calc(Board, Colour, Size, [Row-Col | Rest], Visited, Score, FinalScore) :-
+    member(Row-Col, Visited),
+    connection_score_calc(Board, Colour, Size, Rest, UpdatedVisited, Score, FinalScore).
+
+%this will apply 100 per connection towards the goal and 20 per sidetracking
+neighbors_calc(_, [], Score, Score). %base case no more stones
+neighbors_calc(Row, [NeiRow-_ | Rest],Score, FinalScore):-
+    RowDiff is NeiRow - Row,
+    RowDiff =:= 0, %no change in Row
+    NewScore is Score + 10,
+    neighbors_calc(Row, Rest, NewScore, FinalScore).
+neighbors_calc(Row, [NeiRow-_ | Rest],Score, FinalScore):-
+    RowDiff1 is NeiRow - Row,
+    abs(RowDiff1, RowDiff),
+    RowDiff =:= 1, %goes towards the goal
+    NewScore is Score + 50,
+    neighbors_calc(Row, Rest, NewScore, FinalScore).
+
+/*
+% calculate the score based on the different paths it has, how big they are and if they move optimally in the right direction
+% using a dfs to navigate every path and calculate the score based on the direction the path is making, rewarding that moving towards the goal
+% function working perfectly but having weird interaction whith best_moves so we ditched it
 connection_score([Board, _, _,_], Colour, TotalScore) :-
     length(Board, Size),
     all_pieces(Board, Colour, AllPieces),
@@ -173,7 +207,7 @@ score_calculator(OldRow, NextRow, OldScore, NewScore) :-
     RowDiff is NextRow - OldRow,
     RowDiff =:= 0,
     NewScore is OldScore * 1.005.
-
+*/
 /* auxiliary stuff */
 
 %check if a stone is completely blocked and cannot create any connection because no cordinates near it are valid
@@ -181,6 +215,18 @@ is_blocked_completely(Board, Row-Col, Size, Colour) :-
     neighbor_coords(Row, Col, Size, Neighbors),
     get_surrounding_moves(Board, Colour, Neighbors, [], Surrounding),
     Surrounding = []. %it is blocked completely if it has no valid moves around it
+
+% get valid stones from a list of neighboring coordinates
+get_surrounding_stones(_, _, [], []). % no more neighbors
+% add if it is from correct Colour
+get_surrounding_stones(Board, Colour, [Row-Col|Rest],[Row-Col | Surrounding]) :-
+    nth1(Row, Board, RowList),
+    nth1(Col, RowList, Colour),
+    get_surrounding_stones(Board, Colour, Rest, Surrounding).
+get_surrounding_stones(Board, Colour, [Row-Col|Rest],Surrounding) :-
+    nth1(Row, Board, RowList),
+    \+ nth1(Col, RowList, Colour),
+    get_surrounding_stones(Board, Colour, Rest, Surrounding).
 
 % get valid moves from a list of neighboring coordinates
 get_surrounding_moves(_, _, [], Surrounding, Surrounding). % no more neighbors
