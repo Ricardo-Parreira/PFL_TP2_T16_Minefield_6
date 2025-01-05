@@ -19,14 +19,6 @@ create_board(Element, Size, Board):-
     create_list(Element, Size, List),
     create_list(List, Size, Board).
 
-
-/*Test board*/
-/*
-create_board(Element, Size, Board):-
-    create_list(Element, 3, List),
-    create_list(List, 3, Board).
-*/
-
 print_item(Item) :-
     char(Item,New),
     write(New).

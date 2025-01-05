@@ -1,4 +1,5 @@
 :- consult(utils).
+:- consult(board).
 game_type(N) :-
     print_text("Game type set to ", '', 0),
     write(N), nl.
@@ -73,7 +74,7 @@ requires_difficulty(Type) :-
 initial_state([Type, BoardSize, Difficulty, Mode], GameState) :-
     create_board(empty, BoardSize, Board),   % Create an initial board with the given size and empty configuration
     players(Type, Difficulty, Players),     % Set up the players based on the game type and difficulty level(for bots)
-    GameState = [Board, 'Black', Players, Mode].  % Initialize the game state with the board, starting player ('Black'), and players list
+    GameState = [board_middle_state, 'Black', Players, Mode].  % Initialize the game state with the board, starting player ('Black'), and players list
 
 % Configure players based on the game type
 players(1, _, [['Black', 0], ['White', 0]]) :- !. 

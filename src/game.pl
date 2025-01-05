@@ -202,6 +202,9 @@ valid_moves([Board, CurrentPlayer, _ , Mode | _], ValidMoves) :-
     findall([Row, Col], is_valid_move(Board, Row, Col, CurrentPlayer , Mode), ValidMoves).  
     % Generate a list of all valid moves for the current player by finding rows and columns where a move is valid on the current board.
 
+move([Board, CurrentPlayer, Players,Mode],skipped, [NewBoard, NextPlayer, Players,Mode]) :-
+    switch_player(CurrentPlayer, NextPlayer).                    % Switch to the next player
+
 move([Board, CurrentPlayer, Players,Mode], [Row, Col], [NewBoard, NextPlayer, Players,Mode]) :-
     valid_moves([Board, CurrentPlayer, Players,Mode], ValidMoves),     % Get the list of all valid moves for the current player
     member([Row, Col], ValidMoves),                              % Ensure the desired move is in the list of valid moves
@@ -223,7 +226,7 @@ game_over([Board, _,Players,Mode], 'GAME OVER! It is a draw!') :-
     \+ vertical_wins(Board, b), !.
 
 % If no valid moves are available, skip the turn
-choose_move([Board, CurrentPlayer, Players,Mode], _, [Board, NextPlayer, Players]) :-
+choose_move([Board, CurrentPlayer, Players, Mode], _, skipped) :-
     valid_moves([Board, CurrentPlayer, Players,Mode], []),   % Check if there are no valid moves for the current player
     write('You have no valid moves. Skipping turn.'), nl, % Inform the player that they have no valid moves
     switch_player(CurrentPlayer, NextPlayer).            % Switch to the next player
@@ -262,11 +265,13 @@ game_cycle(GameState) :-
     write(Winner).
 
 %game not over may proceed
-game_cycle(GameState) :- 
+game_cycle(GameState) :-
     get_difficulty_level(GameState, Difficulty),
-    choose_move(GameState, Difficulty, Move),  
-    move(GameState, Move, NewGameState),!, 
-    game_cycle(NewGameState).  
+    choose_move(GameState, Difficulty, Move),!,  % Try to choose the move
+    move(GameState, Move, NewGameState),!,      % Proceed with the move if its valid
+    game_cycle(NewGameState).                 % Recursively call game_cycle with the updated state
+
+
 
    
 play :-
