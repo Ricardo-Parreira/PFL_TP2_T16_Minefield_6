@@ -72,9 +72,10 @@ requires_difficulty(Type) :-
 
 % Set up the initial game state
 initial_state([Type, BoardSize, Difficulty, Mode], GameState) :-
-    create_board(empty, BoardSize, Board),   % Create an initial board with the given size and empty configuration
+    %create_board(empty, BoardSize, Board),   % Create an initial board with the given size and empty configuration
     players(Type, Difficulty, Players),     % Set up the players based on the game type and difficulty level(for bots)
-    GameState = [board_middle_state, 'Black', Players, Mode].  % Initialize the game state with the board, starting player ('Black'), and players list
+    board_black_win(Board),         % For demo
+    GameState = [Board, 'Black', Players, Mode].  % Initialize the game state with the board, starting player ('Black'), and players list
 
 % Configure players based on the game type
 players(1, _, [['Black', 0], ['White', 0]]) :- !. 
